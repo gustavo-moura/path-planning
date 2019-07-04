@@ -184,8 +184,31 @@ class Mission():
             return 2 * picture_distance * math.tan((camera_opening / 2) * math.pi / 180)
 
 
-             
+class Route():
 
+    def __init__():
+        self.route = route
+        self.geo_route = transform_geo_point(route, mission.area.home) #ToDo: checar essa função
+        self.route_length = calc_route_length(route)
+
+        if mission.direction == HORIZONTAL_DIRECTION:
+            self.picture_qty = math.round(route_length / (mission.width * (1 - sobrePosicao)))
+            self.flight_lenght = (route_length / mission.velocity_cruiser)
+            self.picture_per_second = picture_qty / flight_lenght
+
+
+    def saveKml(PrintStream out, String name) { # ToDo: corrigir
+        print("<Placemark>")
+        print("<name>" + name + "</name>")
+        print("<styleUrl>#m_ylw-pushpin0000</styleUrl>")
+        print("<LineString>")
+        print("<tessellate>1</tessellate>")
+        print("<altitudeMode>relativeToGround</altitudeMode>")
+        print("<coordinates>")
+        #print(this.geoRoute.stream().map(e -> e.toString()).reduce(String::concat).get()) # ToDo: checar e corrigir
+        print("</coordinates>")
+        print("</LineString>")
+        print("</Placemark>")
 
 
 
