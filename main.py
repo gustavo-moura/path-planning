@@ -3,8 +3,9 @@ import pandas as pd
 
 # import argparse
 import sys
+import os
 
-# import pathplanning as pp 
+import pathplanning as pp 
 
 obj_parameters = {
         'drone': ['name', 'weight', 'min_battery', 'max_battery', 'max_velocity', 'efficient_velocity'],
@@ -28,11 +29,20 @@ def main():
                 res.append(input(obj+": "))
 
         if arg == '--pathplanning':
-            run_pathplanning()
+            print(extract_df(get('drone', 0)))
 
+            d = get('drone', 0)
+            drone = pp.Drone(d[1], d[2], d[3], d[4], d[5])
 
+            c = get('camera', 0)
+            camera = pp.Camera(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9])
+            
+            a = get('area', 0)
+            area = pp.Area(a[1], a[2])
+            run_pathplanning(drone, camera, area)
 
-    load_presets()
+        if arg == '--loadpresets':
+            load_presets()
 
 
 
@@ -40,20 +50,24 @@ def main():
 # Action Functions
 # ___________________________________________________________________________
 
-def run_pathplanning():
+def run_pathplanning(drone, camera, area):
 
-mission = Mission(VERTICAL_DIRECTION, UP_MOVEMENT,
-                Drone.buildMavicProI(), Cam.buildMavicProI(), 
-                Area.buildMiniJardimSENAITeste(), 16, 5, 1, 0.5, 0.5)
+    mission = pp.Mission(pp.Mission.VERTICAL_DIRECTION, pp.Mission.UP_MOVEMENT,
+                    drone, camera, area, 16, 5, 1, 0.5, 0.5)
 
-controladorGeral = Controller(mission)
-controladorGeral.calcRoute()
+    controladorGeral = pp.Controller(mission)
+    controladorGeral.calcRoute()
 
 
 
 
 # Support functions
 # ___________________________________________________________________________
+
+def extract_df(df):
+    for i in df:
+        yield i
+
 
 def save_to_csv(obj, data):
     print('saving'+obj)
@@ -73,9 +87,6 @@ def save_to_csv(obj, data):
 
 def add(obj, values):
     d = {}
-
-    
-
     keys = obj_parameters[obj]
 
     for key, value in zip(keys, values):
@@ -84,8 +95,38 @@ def add(obj, values):
     return d
 
 
+def get(obj, index):
+    print('opening'+obj)
+    df = pd.DataFrame()
+
+    filename = 'database/' + obj + 's.csv'
+
+    with open(filename, 'r') as file:
+        df = pd.read_csv(file, index_col=0)
+
+    return df.iloc[index]
+
+
+def create_files():
+
+    for obj in ['drone', 'camera', 'area']:
+
+        filename = 'database/' + obj + 's.csv'
+
+        # if not os.path.isfile(filename):
+        #     file = open(filename, 'w+')
+        # else
+
+        with open(filename, 'w+') as file:
+            df = pd.DataFrame(columns=obj_parameters[obj])
+            df.to_csv(file)
+
+
+
 def load_presets():
-    
+
+    create_files()
+
     drones = [
         ['MavicProI', 743.0, 10.0, 18.9, 65.0, 32.5],
         ['Phatom4ProV2', 1375.0, 10.0, 21.0, 72.0, 36.0],
@@ -99,7 +140,7 @@ def load_presets():
 
     area = [
         [
-            'Jardim Senai'
+            'Jardim Senai',
             (-48.45255874975791, -27.43338368181769, 0),
             (
                 (-48.45257490160673, -27.43336038312699, 1),

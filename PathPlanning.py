@@ -2,12 +2,12 @@ import math
 
 class Area():
 
-    def __init__(self, geo_home=geo_home, geo_points=geo_points):
+    def __init__(self, geo_home, geo_points):
 
         self.geo_home = geo_home
         self.geo_points = geo_points
-        self.home = cartesian(geo_home)
-        self.points = cartesian(geo_points) # points = [p1, p2, p3, p4]
+        self.home = Controller.to_cartesian(geo_home) # ToDo: ???
+        self.points = to_cartesian(geo_points) # points = [p1, p2, p3, p4]
         self.hypotenuse = calc_hypotenuse(points)
         self.base_lenght = calc_base_lenght(points)
 
@@ -34,10 +34,10 @@ class Area():
 
 class Camera():
 
-    def __init__(self, open_angle=open_angle, resolution=resolution, 
-        max_zoom=max_zoom, shutter_time=shutter_time, mega_pixel=mega_pixel,
-        trigger=trigger, weight=weight, sensor=sensor, 
-        focus_distance=focus_distance):
+    def __init__(self, open_angle, resolution, 
+        max_zoom, shutter_time, mega_pixel,
+        trigger, weight, sensor, 
+        focus_distance):
 
         self.open_angle = open_angle # open_angle = (h,w)
         self.resolution = resolution # resolution = (h,w)
@@ -52,8 +52,8 @@ class Camera():
 
 class CartesianPoint():
 
-    self.id = None
-    self.id_count = 0
+    id_number = None
+    id_count = 0
 
     def __init__(self, x,y,z):
         self.x = x # position relative to base, in meters
@@ -110,10 +110,11 @@ class CartesianPoint():
 
 class Drone():
 
-    def __init__(weight=weight, min_battery=min_battery, 
-        max_battery=max_battery, max_velocity=max_velocity, 
-        efficient_velocity=efficient_velocity):
+    def __init__(self, weight, min_battery, 
+        max_battery, max_velocity, 
+        efficient_velocity):
 
+        #self.name = name
         self.weight = weight
         self.min_battery = min_battery
         self.max_battery = max_battery
@@ -123,7 +124,7 @@ class Drone():
  
 class GeoPoint():
 
-    def __init__(longitude=longitude, latitude=latitude, height=height):
+    def __init__(longitude, latitude, height):
         
         self.longitude = longitude
         self.latitude = latitude
@@ -131,15 +132,15 @@ class GeoPoint():
 
 
 class Mission():
-    self.HORIZONTAL_DIRECTION = 1
-    self.VERTICAL_DIRECTION = 2
-    self.UP_MOVEMENT = 3
-    self.DOWN_MOVEMENT = 4
+    HORIZONTAL_DIRECTION = 1
+    VERTICAL_DIRECTION = 2
+    UP_MOVEMENT = 3
+    DOWN_MOVEMENT = 4
 
-    def __init__(direction=direction, movement=movement, drone=drone, 
-        camera=camera, area=area, SD_card=SD_card, 
-        picture_distance=picture_distance, zoom=zoom, 
-        sobrePosicao=sobrePosicao, blur_factor=blur_factor):
+    def __init__(self, direction, movement, drone, 
+        camera, area, SD_card, 
+        picture_distance, zoom, 
+        sobrePosicao, blur_factor):
 
         self.direction = direction  # int
         self.movement = movement    # int
@@ -153,7 +154,7 @@ class Mission():
         self.blur_factor = blur_factor #double
 
 
-        self.width = photo_lenght_on_ground(picture_distance, camera.open_angle['w'])
+        self.width = Controller.photo_lenght_on_ground(picture_distance, camera.open_angle['w']) # ToDo: melhorar
         self.height = photo_lenght_on_ground(picture_distance, camera.open_angle['h'])
 
         self.velocity_shutter = self.width * self.blur_factor / (camera.resolution['w'] * camera.shutter_time)
@@ -210,7 +211,7 @@ class Route():
 class Controller():
     pass
 
-    def __init__(self, mission=mission):
+    def __init__(self, mission):
         self.mission = mission
 
 
@@ -340,7 +341,7 @@ class Controller():
                 print("Número de Fotos " + sub.picture_qty)
                 print("Flight Time " + sub.flight_duration / 60)
                 print("Pictures Per Second " + sub.picture_per_second)
-                print(sub.geoRoute.stream().map(e -> e.toString()).reduce(String::concat).get()) # ToDo: verificar função
+                #print(sub.geoRoute.stream().map(e -> e.toString()).reduce(String::concat).get()) # ToDo: verificar função
 
                 routes.append(sub)
 
@@ -431,7 +432,6 @@ class Controller():
             file.write("</kml>")
 
 
-
     def calc_heading_cartesian(c1, c2):
         heading = 360 - math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi() # ToDo: verificar
 
@@ -446,6 +446,7 @@ class Controller():
 
         print(heading)
         return heading
+
 
     def calc_heading_geo(p1, p2, home):
         c1 = to_cartesian(p1, home)
