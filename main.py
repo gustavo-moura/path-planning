@@ -31,14 +31,36 @@ def main():
         if arg == '--pathplanning':
             print(extract_df(get('drone', 0)))
 
-            d = get('drone', 0)
-            drone = pp.Drone(d[1], d[2], d[3], d[4], d[5])
-
-            c = get('camera', 0)
-            camera = pp.Camera(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9])
             
-            a = get('area', 0)
-            area = pp.Area(a[1], a[2])
+            drone = pp.Drone(
+                743.0, 
+                10.0, 
+                18.9, 
+                65.0, 
+                32.5
+            )
+
+            
+            camera = pp.Camera(
+                (78.8, 59.1),
+                (4000.0, 3000.0), 
+                1, 
+                1.0 / 8000.0, 
+                12.0, 
+                5.0, 
+                200.0, 
+                (6.17, 4.5), 
+                28.0
+            )
+    
+
+            
+            geo_home = pp.GeoPoint((-48.45255874975791, -27.43338368181769, 0))
+
+            points = ((-48.45257490160673, -27.43336038312699, 1), (-48.45235131274588, -27.43329678596995, 1), (-48.45239011279272, -27.43319913253362, 4), (-48.45261463110952, -27.43325291267052, 4))
+            geo_points = [pp.GeoPoint(i) for i in points]
+
+            area = pp.Area(geo_home, geo_points)
             run_pathplanning(drone, camera, area)
 
         if arg == '--loadpresets':
@@ -56,7 +78,7 @@ def run_pathplanning(drone, camera, area):
                     drone, camera, area, 16, 5, 1, 0.5, 0.5)
 
     controladorGeral = pp.Controller(mission)
-    controladorGeral.calcRoute()
+    controladorGeral.calc_route()
 
 
 
@@ -142,12 +164,12 @@ def load_presets():
         [
             'Jardim Senai',
             (-48.45255874975791, -27.43338368181769, 0),
-            (
+            [
                 (-48.45257490160673, -27.43336038312699, 1),
                 (-48.45235131274588, -27.43329678596995, 1),
                 (-48.45239011279272, -27.43319913253362, 4),
                 (-48.45261463110952, -27.43325291267052, 4)
-            )
+            ]
         ]
     ]
 

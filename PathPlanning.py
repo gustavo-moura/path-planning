@@ -6,17 +6,23 @@ class Area():
 
         self.geo_home = geo_home
         self.geo_points = geo_points
-        self.home = Controller.to_cartesian(geo_home) # ToDo: ???
-        self.points = to_cartesian(geo_points) # points = [p1, p2, p3, p4]
-        self.hypotenuse = calc_hypotenuse(points)
-        self.base_lenght = calc_base_lenght(points)
+        self.home = Controller.to_cartesian(geo_home, geo_home) # ToDo: ???
+        self.points = Controller.to_cartesians(geo_points, geo_home) # points = [p1, p2, p3, p4]
+        self.hypotenuse = self.calc_hypotenuse(self.points)
+        self.base_lenght = self.calc_base_lenght(self.points)
 
 
-    def calc_hypotenuse(self, point):
-        pass
+    def calc_hypotenuse(self, points):
+        h1 = points[3].minus(points[0])
+        h2 = points[2].minus(points[1])
+
+        return max(h1.norm(), h2.norm())
     
-    def calc_base_lenght(self, point):
-        pass
+    def calc_base_lenght(self, points):
+        h1 = points[3].minus(points[2])
+        h2 = points[0].minus(points[1])
+
+        return max(h1.norm(), h2.norm())
     '''
     private static double calcHipotenusa(CartesianPoint p1, CartesianPoint p2, CartesianPoint p3, CartesianPoint p4) {
         CartesianPoint h1 = p4.minus(p1)
@@ -96,7 +102,7 @@ class CartesianPoint():
      * objeto atual ao qual foi chamado a função P2 é o objeto passado como
      * parâmetro.
     '''
-    def sumproduct(self, number):
+    def sumproduct(self, coef, other):
         x = self.x + coef * other.x
         y = self.y + coef * other.y
         z = self.z + coef * other.z
@@ -104,8 +110,8 @@ class CartesianPoint():
         return CartesianPoint(x, y, z)
 
 
-    def norm():
-        return sqrt(x**2 + y**2 + z**2)
+    def norm(self):
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
 
 class Drone():
@@ -124,12 +130,14 @@ class Drone():
  
 class GeoPoint():
 
-    def __init__(longitude, latitude, height):
-        
-        self.longitude = longitude
-        self.latitude = latitude
-        self.height = height
-
+    #def __init__(self, longitude, latitude, height):   
+        # self.longitude = longitude
+        # self.latitude = latitude
+        # self.height = height
+    def __init__(self, tupler):
+        self.longitude = tupler[0]
+        self.latitude = tupler[1]
+        self.height = tupler[2]
 
 class Mission():
     HORIZONTAL_DIRECTION = 1
@@ -154,38 +162,38 @@ class Mission():
         self.blur_factor = blur_factor #double
 
 
-        self.width = Controller.photo_lenght_on_ground(picture_distance, camera.open_angle['w']) # ToDo: melhorar
-        self.height = photo_lenght_on_ground(picture_distance, camera.open_angle['h'])
+        self.width = self.photo_length_on_ground(picture_distance, camera.open_angle[1]) # ToDo: melhorar # ToDo: melhorar tipo de dado do camera.open_angle['w']
+        self.height = self.photo_length_on_ground(picture_distance, camera.open_angle[0]) # ToDo: melhorar tipo de dado do camera.open_angle['w']
 
-        self.velocity_shutter = self.width * self.blur_factor / (camera.resolution['w'] * camera.shutter_time)
-        self.velocity_cruiser = min(drone.efficient_velocity / 3.6, velocity_shutter) # ToDo: ver de onde vem esse 3.6
+        self.velocity_shutter = self.width * self.blur_factor / (camera.resolution[0] * camera.shutter_time) # ToDo: melhorar tipo de dado do camera.open_angle['w']
+        self.velocity_cruiser = min(drone.efficient_velocity / 3.6, self.velocity_shutter) # ToDo: ver de onde vem esse 3.6
 
-        if direction == HORIZONTAL_DIRECTION:
-            self.picture_precision = self.width * 1000 / camera.resolution['w']
-            self.turn_qty = calc_turn_qty(area.hypotenuse, self.height, self.sobrePosicao) # ToDo: renomear
+        if direction == self.HORIZONTAL_DIRECTION:
+            self.picture_precision = self.width * 1000 / camera.resolution[1] # ToDo: melhorar tipo de dado do camera.open_angle['w']
+            self.turn_qty = self.calc_turn_qty(area.hypotenuse, self.height, self.sobrePosicao) # ToDo: renomear
             self.turn_width = area.hypotenuse / (turn_qty-1)
             self.turn_lenght = area.base_lenght
 
         else:
-            self.picture_precision = self.height * 1000 / camera.resolution['h']
-            self.turn_qty = calc_turn_qty(area.base_lenght, self.width, self.sobrePosicao) # ToDo: renomear
-            self.turn_width = area.base_lenght / (turn_qty-1)
+            self.picture_precision = self.height * 1000 / camera.resolution[0] # ToDo: melhorar tipo de dado do camera.open_angle['w']
+            self.turn_qty = self.calc_turn_qty(area.base_lenght, self.width, self.sobrePosicao) # ToDo: renomear
+            self.turn_width = area.base_lenght / (self.turn_qty-1)
             self.turn_lenght = area.hypotenuse
 
 
-        # Calculate the turns quantity
-        def calc_turn_qty(hypotenuse, width, sobrePosicao):
-            return (0.8 + hypotenuse / (width * (1 - sobrePosicao))) + 1
+    # Calculate the turns quantity
+    def calc_turn_qty(self, hypotenuse, width, sobrePosicao):
+        return (0.8 + hypotenuse / (width * (1 - sobrePosicao))) + 1
 
-        def photo_length_on_ground(picture_distance, camera_opening):
+    def photo_length_on_ground(self, picture_distance, camera_opening):
             return 2 * picture_distance * math.tan((camera_opening / 2) * math.pi / 180)
 
 
 class Route():
 
-    def __init__():
+    def __init__(self, route, mission):
         self.route = route
-        self.geo_route = transform_geo_point(route, mission.area.home) #ToDo: checar essa função
+        self.geo_route = Controller.transform_geo_points(route, mission.area.geo_home) #ToDo: checar essa função
         self.route_length = calc_route_length(route)
 
         if mission.direction == HORIZONTAL_DIRECTION:
@@ -209,7 +217,7 @@ class Route():
 
 
 class Controller():
-    pass
+    
 
     def __init__(self, mission):
         self.mission = mission
@@ -226,7 +234,7 @@ class Controller():
      * @return
      */
     '''
-    def calc_complete_route():
+    def calc_complete_route(self):
         mission = self.mission
         area = mission.area
 
@@ -237,8 +245,8 @@ class Controller():
         route = [] #List of CartesianPoints
 
 
-        if mission.direction == HORIZONTAL_DIRECTION:
-            if mission.movement == UP_MOVEMENT:
+        if mission.direction == Mission.HORIZONTAL_DIRECTION:
+            if mission.movement == Mission.UP_MOVEMENT:
                 A = 0
                 B = 1
                 C = 2
@@ -251,7 +259,7 @@ class Controller():
                 D = 0
 
         else:
-            if mission.direction == UP_MOVEMENT:
+            if mission.direction == Mission.UP_MOVEMENT:
                 A = 0
                 B = 3
                 C = 2
@@ -274,7 +282,7 @@ class Controller():
         route.append(points[B])
 
 
-        for i in range(mission.turn_qty):
+        for i in range(int(mission.turn_qty)):
             if i%2 == 0:
                 route.append(points[A].sumproduct(i, l_bar))
                 route.append(points[B].sumproduct(i, r_bar))
@@ -289,8 +297,8 @@ class Controller():
         return Route(route, mission)
 
 
-    def calc_route(): #throws FileNotFoundException, IOException
-        route = calc_complete_route()
+    def calc_route(self): #throws FileNotFoundException, IOException
+        route = self.calc_complete_route()
         mission = self.mission
 
         print("-------------------------------------------------------------------------------")
@@ -349,8 +357,8 @@ class Controller():
                 routes.append(route)
 
 
-            save_kml(routes, mission)
-            save_litchi(routes, mission)
+            Controller.save_kml(routes, mission)
+            Controller.save_litchi(routes, mission)
 
 
     def save_litchi(routes, mission): #throws FileNotFoundException
@@ -363,7 +371,7 @@ class Controller():
                 for geo_point in route.geo_route:
                     file.write(geo_point.latitude + ',' 
                         + geo_point.latitude + ','
-                        + calc_heading(mission.area.point[0], mission.area.point[1]) + ','
+                        + Controller.calc_heading(mission.area.point[0], mission.area.point[1]) + ','
                         + "0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1"
                         )
 
@@ -420,7 +428,7 @@ class Controller():
                 route.save_kml(file, "route" + count)
                 count += 1 
             
-            save_kml_point(file, mission.area.home, "H")
+            Controller.save_kml_point(file, mission.area.home, "H")
 
             count = 0
             for point in mission.area.points:
@@ -433,7 +441,7 @@ class Controller():
 
 
     def calc_heading_cartesian(c1, c2):
-        heading = 360 - math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi() # ToDo: verificar
+        heading = 360 - math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi # ToDo: verificar
 
         heading = heading % 360 #if heading>360 else heading # ToDo: simplificar com expressão de cima
 
@@ -442,7 +450,7 @@ class Controller():
         print("dx = %5.2f \n", (c2.x - c1.x))
         print("dy = %5.2f \n", (c2.y - c1.y))
         print("dy/dx = %5.2f \n", (c2.y - c1.y) / (c2.x - c1.x))
-        print("dy/dx = %5.2f \n", math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi()) # ToDo: verificar
+        print("dy/dx = %5.2f \n", math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi) # ToDo: verificar
 
         print(heading)
         return heading
@@ -452,7 +460,7 @@ class Controller():
         c1 = to_cartesian(p1, home)
         c2 = to_cartesian(p2, home)
 
-        heading = math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi() + 90 # ToDo: verificar
+        heading = math.atan2((c2.y - c1.y), (c2.x - c1.x)) * 180 / math.pi + 90 # ToDo: verificar
         return heading
 
 
@@ -501,23 +509,27 @@ class Controller():
         final_route = []
 
         for element in route:
-            final_route.append(to_geo_point(element, home))
+            final_route.append(Controller.to_geo_point(element, home))
 
         return final_route
 
 
     def to_geo_point(cartesian_point, home):
-        longitude_x = calc_longitude_x(home.latitude, home.longitude, cartesian_point.x)
-        latitude_y = calc_latitude_y(home.latitude, cartesian_point.y)
+        longitude_x = Controller.calc_longitude_x(home.latitude, home.longitude, cartesian_point.x)
+        latitude_y = Controller.calc_latitude_y(home.latitude, cartesian_point.y)
 
         return GeoPoint(longitude_x, latitude_y, cartesian_point.z)
 
 
     def to_cartesian(geo_point, home):
-        x = calc_x(geo_point.longitude, home.longitude, home.latitude)
-        y = calc_y(geo_point.latitude, home.latitude)
+        x = Controller.calc_x(geo_point.longitude, home.longitude, home.latitude)
+        y = Controller.calc_y(geo_point.latitude, home.latitude)
 
         return CartesianPoint(x, y, geo_point.height)
+
+    def to_cartesians(geo_point_list, home):
+        return [Controller.to_cartesian(point, home) for point in geo_point_list]
+
 
 
     def calc_y(lat, lat_):
@@ -525,7 +537,7 @@ class Controller():
 
 
     def calc_x(longi, longi_, lat_):
-        pi = math.pi()
+        pi = math.pi
         return (longi - longi_) * (6400000.0 * (math.cos(lat_ * pi / 180) * 2 * pi / 360)) # ToDo: verificar math
 
 
@@ -534,11 +546,11 @@ class Controller():
 
 
     def calc_longitude_x(lat_, longi_, x):
-        return ((x * 90) / (10008000 * math.cos(lat_ * math.pi() / 180))) + long_
+        return ((x * 90) / (10008000 * math.cos(lat_ * math.pi / 180))) + long_
 
 
     def photo_lenght_on_ground(picture_distance, camera_opening):
-        return 2 * picture_distance * Math.tan((camera_opening / 2) * math.pi() / 180)
+        return 2 * picture_distance * math.tan((camera_opening / 2) * math.pi / 180)
 
 
     def calc_denescala(mission): # ToDo: renomear
@@ -552,14 +564,14 @@ class Controller():
         return mission.camera.sensor['y'] / mission.camera.resolution['h']
 
     def calc_tam(mission):
-        a = calc_sensor_x(mission)
-        b = calc_sensor_y(mission)
+        a = Controller.calc_sensor_x(mission)
+        b = Controller.calc_sensor_y(mission)
 
         return math.min(a, b) # ToDo: verificar
 
     def calc_GSD(mission):
-        denescala = calc_denescala(mission)
-        tam = calc_tam(mission)
+        denescala = Controller.calc_denescala(mission)
+        tam = Controller.calc_tam(mission)
         print(denescala + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
         return denescala * tam
