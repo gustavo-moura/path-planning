@@ -1,12 +1,21 @@
 import math
+import objectivefunction as of
 
 class Subject():
 
     # fitness = int
 
+    # codificação - u
     # dna = [(a, e), ...]
     #     a = float: aceleração
     #     e = float: variação angular
+
+    # decodificação - x
+    # x = [(px, py, v, al), ...]
+    #     px = : Posição do VANT no eixo x 
+    #     py = : Posição do VANT no eixo y
+    #     v  = : Velocidade do VANT na horizontal
+    #     al = : ângulo (direção) do VANT na horizontal
 
     # mutation_rate = float
 
@@ -48,6 +57,11 @@ class Subject():
         a = random.uniform(0.5, 10)
         e = random.uniform(0.5, 2*math.pi)
         return (a, e)
+
+
+    def get_omega():
+        #       ( px  ,  py  )
+        return [(xt[0], xt[1]) for xt in x]
 
 
 
@@ -97,7 +111,7 @@ class GeneticAgorithm():
 
     def evaluate(self, population):
         for subject in self.population:
-            subject.fitness = self.objective_function()
+            subject.fitness = of.objective_function()
 
 
     def crossover(self):
@@ -106,44 +120,6 @@ class GeneticAgorithm():
 
     def mutate(self):
         return [subject.mutate() for subject in self.population]
-
-
-    def objective_function():
-        fitness = f_pouso_b + f_pouso_p + f_pouso_voo_n + f_curvas + f_dist + f_viol + f_bat
-
-
-
-    def f_pouso_b():
-        # Define recompensa em caso de pouso em regiões bonificadoras.
-        Cb = custo de pousar no conjunto bonificador
-
-        custo * somatoria da probabilidade de pousar em cada uma das regiões bonificadoras
-
-
-    def f_pouso_p(): 
-        # Define punição em caso de pouso em regiões penalizadoras.
-
-    def f_pouso_voo_n():
-        # Penaliza o pouso ou voo da aeronave sobre regiões não navegáveis.
-        ???
-
-        
-    def f_curvas():
-        # Prioriza rotas que evitem fazer curvas desnecessárias.
-
-    def f_dist():
-        # Dá mais chance a rotas com menores distâncias das regiões bonificadoras.
-
-    def f_viol():
-        # Se a aeronave tem velocidade final maior do que o seu valor mínimo, não ocorre de fato
-        # um pouso. Dessa maneira, a Equação (f_viol) evita rotas em que o VANT não consegue pousar,
-        # mesmo que atinja uma região bonificadora.
-
-    def f_bat():
-        # Se houver um problema na bateria, a Equação (f_bat) é adicionada à função de fitness. O
-        # objetivo é reduzir o tempo de voo, assim a aeronave buscará regiões para pouso mais próximas
-        # de sua localização no momento onde ocorreu a pane.
-
 
 
 
