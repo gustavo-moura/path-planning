@@ -1,3 +1,4 @@
+from collections import namedtuple
 
 import math
 
@@ -7,7 +8,7 @@ epsilon = 0.00001
 
 # Com base na página 106 da tese de mestrado do Jesimar
 # Modelo
-T = 60
+# T = 60
 deltaT = 1
 delta = 0.001
 e_min = -3
@@ -59,7 +60,9 @@ def transitar_(subject, t):
     al_ = a + e * deltaT 
 
 
-    return (px_, py_, v_, al_)
+    control = namedtuple('control', 'x y v a')
+
+    return control(px_, py_, v_, al_)
 
 
 
@@ -69,14 +72,14 @@ def objective_function(subject, mapa):
 
     x = subject.x
 
-    K = len(x)-1
+    K = len(x)-1 # posição final
 
-    vk = x[K][2]
+    vk = x[K].v
 
     fit = [f_pouso_b(x[K], mapa),
         f_pouso_p(x[K], mapa), 
         f_pouso_voo_n(x, mapa), 
-        f_curvas(subject),    # Desativado
+        f_curvas(subject),
         f_dist(),      # Desativado
         f_viol(vk), 
         f_bat(K)        # Desativado
@@ -163,7 +166,8 @@ def Somatoria_dupla(func, xs, Zs):
     return soma
 
 
-def Pr_x_E_Z(x, Z):
+# Deprecated
+def deprecated_Pr_x_E_Z(x, Z):
     # print()
     # print(x)
     # for p in Z:
@@ -179,6 +183,44 @@ def Pr_x_E_Z(x, Z):
     else:
         # print("NAO")
         return 0
+
+def Pr_x_E_Z(x, Z):
+
+
+def chance_of_collision(X, Z):
+    # seja x um ponto e Z uma área
+
+    # Z.points = [p1, p2, p3, p4]
+    # p.x p.y p.z
+
+    edges = Z.get_edges()
+    for edge in edges:
+        delta_y = - (edge.A.y - edge.B.y)
+        delta_x = + (edge.A.x - edge.B.x)
+
+        b = delta_y * edge.A.x + delta_x * edge.A.y  # Curva de nível (?)
+
+
+        R = sqrt(2 * sum(a**2) * P0)
+
+        chance = (delta_y * x + delta_x * y - b) / R
+
+        
+
+
+
+def normal(A, B):
+    # plano determinado pela equação ax + by + cz + d = 0, onde (a, b, c) é o vetor normal
+
+    x = (A.x - B.x)
+    y = (A.y - B.y)
+
+    # direction_vector = (x, y) # vector in the same direction of the line that connects A and B
+    normal_vector = (-y, x) # rotate the direction vector by 90º. (x, y) -> (-y, x) 
+
+    normal = (normal_vector[0], normal_vector[1], c, 0, 0, 0)
+
+    return normal
 
 
 def Pr_x_nE_Z(x, Z):
@@ -224,20 +266,20 @@ def ray_intersects_segment(P, A, B):
     #     (B must be "above" A)
 
     # To avoid the "ray on vertex" problem, the point is moved upward of a small quantity epsilon.
-    if P[1] == A.y or P[1] == B.y:
-        P[1] += epsilon
+    if P.y == A.y or P.y == B.y:
+        P.y += epsilon
 
     # Point higher or lower than polygon
-    if P[1] < A.y or P[1] > B.y:
+    if P.y < A.y or P[1] > B.y:
         return False
 
     # Point to the right of the polygon
-    elif P[0] >= max(A.x, B.x):
+    elif P.x >= max(A.x, B.x):
         return False 
 
     else:
 
-        if P[0] < min(A.x, B.x):
+        if P.x < min(A.x, B.x):
             return True
 
         else:
@@ -248,8 +290,8 @@ def ray_intersects_segment(P, A, B):
                 m_red = 99999999 # Infinite
 
 
-            if A.x != P[0]:
-                m_blue = (P[1] - A.y)/(P[0] - A.x)
+            if A.x != P.x:
+                m_blue = (P.y - A.y)/(P.x - A.x)
             else:
                 m_blue = 99999999 # Infinite
 
@@ -258,6 +300,61 @@ def ray_intersects_segment(P, A, B):
                 return True
             else:
                 return False
+
+
+# ------- Implementação do Calculo de chance de colisão
+
+
+def prob_of_fail(x, y, areas):
+    prob_of_fail = 0
+
+    x = # Posição atual do Drone no eixo x
+    y = # Posição atual do Drone no eixo y
+
+    for area in areas:
+        chance = chance_of_collision()
+        prob_of_fail += min(chance, 1)
+
+    prob_of_fail = min(prob_of_fail, 1)
+
+    return prob_of_fail
+
+
+
+def chance_of_collision():
+
+    maior = 
+
+    for lado in polygon:
+        
+        delta_y = 
+        
+
+        exp = (x * delta_y + y * delta_x - b) / R
+        maior = max(exp, maior)
+
+
+
+    Risco = Normal.standardTailProb(maior, false)
+    delta = (1 - Risco) / 2
+
+    return l == inst.L -1 ? 2*delta : delta
+
+
+    return chance
+
+
+
+
+
+# --------
+
+
+for poligono in mapa: # poligono j
+    for aresta in poligono: # aresta i
+
+        normal = (a1, a2, a3, 0, 0, 0)
+
 
 
 

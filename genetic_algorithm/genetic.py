@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import objectivefunction as of
 
 QUIETUS = 1000 # Quantity of generations until the species extinction
-SUBJECT_QTY = 10 # Quantity of subjects in the population
-GENE_QTY = 60 # Horizonte de planejamento
+SUBJECT_QTY = 100 # Quantity of subjects in the population
+GENE_QTY = 5 # Horizonte de planejamento # T
 path = ''
 # https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python
 
@@ -26,14 +26,14 @@ class Subject():
 
     # decodificação - x
     # x = [(px, py, v, al), ...]
-    #     px = : Posição do VANT no eixo x 
-    #     py = : Posição do VANT no eixo y
-    #     v  = : Velocidade do VANT na horizontal
-    #     al = : ângulo (direção) do VANT na horizontal
+    #     x = : Posição do VANT no eixo x 
+    #     y = : Posição do VANT no eixo y
+    #     v = : Velocidade do VANT na horizontal
+    #     a = : ângulo (direção) do VANT na horizontal
 
     # mutation_rate = float
 
-    def __init__(self, gene_qty=GENE_QTY, mutation_rate=0.1):
+    def __init__(self, gene_qty=GENE_QTY, mutation_rate=0):
         self.gene_qty = gene_qty
         self.dna = [self.random_gene() for i in range(self.gene_qty)]
         self.mutation_rate = mutation_rate

@@ -7,8 +7,6 @@ if nb_dir not in sys.path:
 
 import static_pathplanning.pathplanning as pp
 
-# import pathplanning as pp
-
 
 class Map:
     def __init__(self, origem, destino, bonificadoras, penalizadoras, nao_navegaveis):
