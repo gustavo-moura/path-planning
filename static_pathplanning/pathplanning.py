@@ -1,3 +1,6 @@
+from collections import namedtuple
+
+
 import math
 
 path='' # ToDo: melhorar
@@ -10,7 +13,7 @@ class Area():
         self.geo_home = geo_home
         self.geo_points = geo_points
         self.home = Controller.to_cartesian(geo_home, geo_home) # ToDo: ???
-        self.points = Controller.to_cartesians(geo_points, geo_home) # points = [p1, p2, p3, p4]
+        self.points = Controller.to_cartesians(geo_points, geo_home) # points = [p1, p2, p3, p4] # point order not verified # ToDo: verify order
         self.hypotenuse = self.calc_hypotenuse(self.points)
         self.base_lenght = self.calc_base_lenght(self.points)
 
@@ -26,19 +29,23 @@ class Area():
         h2 = points[0].minus(points[1])
 
         return max(h1.norm(), h2.norm())
-    '''
-    private static double calcHipotenusa(CartesianPoint p1, CartesianPoint p2, CartesianPoint p3, CartesianPoint p4) {
-        CartesianPoint h1 = p4.minus(p1)
-        CartesianPoint h2 = p3.minus(p2)
-        return Math.max(h1.norm(), h2.norm())
-    }
 
-    private double calcComprimentoBase(CartesianPoint p1, CartesianPoint p2, CartesianPoint p3, CartesianPoint p4) {
-        CartesianPoint h1 = p4.minus(p3)
-        CartesianPoint h2 = p1.minus(p2)
-        return Math.max(h1.norm(), h2.norm())
-    }
-    '''
+    def get_edges(self):
+        edges = []
+
+        edge = namedtuple('edge', 'A B')
+
+        qtd = len(self.points)
+
+        for i in range(qtd-1):
+            e = edge(self.points[i], self.points[i+1])
+            edges.append(e)
+
+        e = edge(self.points[qtd], self.points[0])
+        edges.append(e)
+
+        return edges
+
 
 
 class Camera():

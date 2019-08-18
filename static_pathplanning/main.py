@@ -1,11 +1,11 @@
 # cd /mnt/c/Projetos/path-planning
 import pandas as pd
 
-# import argparse
 import sys
 import os
 
 import pathplanning as pp 
+import presetbuilds as presets
 
 obj_parameters = {
         'drone': ['name', 'weight', 'min_battery', 'max_battery', 'max_velocity', 'efficient_velocity'],
@@ -32,35 +32,13 @@ def main():
             print(extract_df(get('drone', 0)))
 
             
-            drone = pp.Drone(
-                743.0, 
-                10.0, 
-                18.9, 
-                65.0, 
-                32.5
-            )
-
+            #drone = presets.build_drone_MavicProI()
+            drone = presets.build_drone_Phatom4Pro()
             
-            camera = pp.Camera(
-                (78.8, 59.1),
-                (4000.0, 3000.0), 
-                1, 
-                1.0 / 8000.0, 
-                12.0, 
-                5.0, 
-                200.0, 
-                (6.17, 4.5), 
-                28.0
-            )
-    
+            camera = presets.build_camera_MavicProI()
 
-            
-            geo_home = pp.GeoPoint((-48.45255874975791, -27.43338368181769, 0))
+            area = presets.build_area_C2()
 
-            points = ((-48.45257490160673, -27.43336038312699, 1), (-48.45235131274588, -27.43329678596995, 1), (-48.45239011279272, -27.43319913253362, 4), (-48.45261463110952, -27.43325291267052, 4))
-            geo_points = [pp.GeoPoint(i) for i in points]
-
-            area = pp.Area(geo_home, geo_points)
             run_pathplanning(drone, camera, area)
 
         if arg == '--loadpresets':
