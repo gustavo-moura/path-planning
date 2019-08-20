@@ -4,8 +4,9 @@ import pandas as pd
 import sys
 import os
 
-import pathplanning as pp 
-import presetbuilds as presets
+import data_definitions as data
+from algorithms.square_planning.square_planning import Planning
+from algorithms.square_planning.square_planning import presetsbuilds as preset
 
 obj_parameters = {
         'drone': ['name', 'weight', 'min_battery', 'max_battery', 'max_velocity', 'efficient_velocity'],
@@ -52,11 +53,12 @@ def main():
 
 def run_pathplanning(drone, camera, area):
 
-    mission = pp.Mission(pp.Mission.VERTICAL_DIRECTION, pp.Mission.UP_MOVEMENT,
+    mission = data.Mission(data.Mission.VERTICAL_DIRECTION, data.Mission.UP_MOVEMENT,
                     drone, camera, area, 16, 5, 1, 0.5, 0.5)
 
-    controladorGeral = pp.Controller(mission)
+    controladorGeral = Planning(mission)
     controladorGeral.calc_route()
+    controladorGeral.save(['kml', 'mavros'])
 
 
 
@@ -163,24 +165,4 @@ def load_presets():
 
 
 
-
-
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
