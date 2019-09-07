@@ -3,7 +3,7 @@ import random
 
 import matplotlib.pyplot as plt
 
-import objectivefunction as of
+from algorithms.genetic_algorithm import objectivefunction as of
 
 QUIETUS = 1000 # Quantity of generations until the species extinction
 SUBJECT_QTY = 100 # Quantity of subjects in the population

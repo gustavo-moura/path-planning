@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+from scipy.special import erf
+import numpy as np
 import math
 
 # Used on the Ray-Tracing Algorithm
@@ -24,7 +26,8 @@ vmin = 11.1
 
 
 
-# MINIMIZAR
+# ------- Function to decodify the subject
+
 def transitar_(subject, t):
     # Realiza a decodificação da transição entre os tempos t e t+1
     # Representa as mudanças de estados do VANT
@@ -67,6 +70,8 @@ def transitar_(subject, t):
 
 
 
+# ------- Objective function
+
 def objective_function(subject, mapa):
     # Minimizar a função objetivo
 
@@ -75,6 +80,10 @@ def objective_function(subject, mapa):
     K = len(x)-1 # posição final
 
     vk = x[K].v
+
+
+    print(x[K], mapa)
+
 
     fit = [f_pouso_b(x[K], mapa),
         f_pouso_p(x[K], mapa), 
@@ -87,11 +96,13 @@ def objective_function(subject, mapa):
 
     fitness = sum(fit)
 
-    # print(fit)
-    # print(fitness)
-    # #exit()
+    print(fit)
+    print(fitness)
+    exit()
 
     return fitness
+
+
 
 
 # ------- Intermediary functions
@@ -99,8 +110,9 @@ def objective_function(subject, mapa):
 def f_pouso_b(x, mapa): # 4.3
     # Define recompensa em caso de pouso em regiões bonificadoras.
     # custo * somatoria da probabilidade de pousar em cada uma das regiões bonificadoras
-   
-    return -Cb * Somatoria(Pr_x_E_Z, x, mapa.bonificadoras)
+    res = -Cb * Somatoria(Pr_x_E_Z, x, mapa.bonificadoras)
+    print(Somatoria(Pr_x_E_Z, x, mapa.bonificadoras))
+    return res
     
 
 def f_pouso_p(x, mapa): # 4.4
@@ -112,7 +124,7 @@ def f_pouso_p(x, mapa): # 4.4
 def f_pouso_voo_n(x, mapa): # 4.5
     # Penaliza o pouso ou voo da aeronave sobre regiões não navegáveis.    
    
-    calc = 1 - delta - Somatoria_dupla(Pr_x_nE_Z, x, mapa.nao_navegaveis)
+    calc = 1 - delta - Somatoria_dupla(Pr_x_E_Z, x, mapa.nao_navegaveis)
     return Cn * max(0, calc)
 
     
@@ -145,15 +157,20 @@ def f_bat(K): # 4.9
     #return Cb * (2 ** ((K-T)/10) )
     return 0
 
+
+
+
 # ------- Auxiliary functions
 
 def Somatoria(func, x, Zs):
     soma = 0
 
     for Z in Zs:
-        soma += func(x, Z.points)
+        f = func(x, Z)
+        print("f: ", f)
+        soma += f
 
-    return soma
+    return min(soma, 1)
 
 
 def Somatoria_dupla(func, xs, Zs):
@@ -161,52 +178,43 @@ def Somatoria_dupla(func, xs, Zs):
 
     for x in xs:
         for Z in Zs:
-            soma += func(x, Z.points)
+            soma += func(x, Z)
 
-    return soma
+    return min(soma, 1)
 
 
-# Deprecated
-def deprecated_Pr_x_E_Z(x, Z):
-    # print()
-    # print(x)
-    # for p in Z:
-    #     print(p.x, p.y, p.z)
 
-    if point_in_polygon(x, Z):    
-        # print("SIM")
-        # print()
-        # print(x)
-        # for p in Z:
-        #     print(p.x, p.y, p.z)
-        return 1
-    else:
-        # print("NAO")
-        return 0
 
-def Pr_x_E_Z(x, Z):
+# ------- Chance of collision, probability
 
 
 def chance_of_collision(X, Z):
-    # seja x um ponto e Z uma área
+    # seja X um ponto e Z uma área
 
     # Z.points = [p1, p2, p3, p4]
     # p.x p.y p.z
 
+    maior = -99999999 
+
     edges = Z.get_edges()
     for edge in edges:
-        delta_y = - (edge.A.y - edge.B.y)
-        delta_x = + (edge.A.x - edge.B.x)
+        normal_vector = normal(edge.A, edge.B)
+
+        delta_y = normal_vector[0]
+        delta_x = normal_vector[1]
 
         b = delta_y * edge.A.x + delta_x * edge.A.y  # Curva de nível (?)
-
-
-        R = sqrt(2 * sum(a**2) * P0)
-
-        chance = (delta_y * x + delta_x * y - b) / R
-
-        
-
+        P0=100
+        R = math.sqrt(2 * np.sum(np.power(normal_vector, 2)) * P0)
+        chance = (delta_y * X.x + delta_x * X.y - b) / R
+        print('chance: ', chance)
+        maior = max(chance, maior)
+        print(maior)
+    print('erf', erf(maior))
+    delta = (1 - erf(maior)) / 2
+    print("delta: ", delta)
+    #return l == inst.L -1 ? 2*delta : del
+    return delta
 
 
 def normal(A, B):
@@ -218,145 +226,13 @@ def normal(A, B):
     # direction_vector = (x, y) # vector in the same direction of the line that connects A and B
     normal_vector = (-y, x) # rotate the direction vector by 90º. (x, y) -> (-y, x) 
 
-    normal = (normal_vector[0], normal_vector[1], c, 0, 0, 0)
+    normal = np.array([normal_vector[0], normal_vector[1], 0, 0, 0, 0])
 
     return normal
 
 
-def Pr_x_nE_Z(x, Z):
-    if not point_in_polygon(x, Z):
-        return 1
-    else:
-        return 0
-
-
-# -------
-
-
-def point_in_polygon(point, polygon):
-    # Using ray_casting algorithm
-    # https://rosettacode.org/wiki/Ray-casting_algorithm
-    count = 0
-
-    for i in range(len(polygon) - 1):
-        vertex1 = polygon[i]
-        vertex2 = polygon[i-1]
-
-        if vertex1.y < vertex2.y:
-            A = vertex1
-            B = vertex2
-        else:
-            A = vertex2
-            B = vertex1
-
-        if ray_intersects_segment(point, A, B):
-            count += 1
-    # print("count", count)
-    if count!=0 and count % 2 == 0: # Odd
-        return True # Inside the polygon
-    else:
-        return False
-
-
-def ray_intersects_segment(P, A, B):
-    # P : the point from which the ray starts
-    # A : the end-point of the segment with the smallest y coordinate
-    #     (A must be "below" B)
-    # B : the end-point of the segment with the greatest y coordinate
-    #     (B must be "above" A)
-
-    # To avoid the "ray on vertex" problem, the point is moved upward of a small quantity epsilon.
-    if P.y == A.y or P.y == B.y:
-        P.y += epsilon
-
-    # Point higher or lower than polygon
-    if P.y < A.y or P[1] > B.y:
-        return False
-
-    # Point to the right of the polygon
-    elif P.x >= max(A.x, B.x):
-        return False 
-
-    else:
-
-        if P.x < min(A.x, B.x):
-            return True
-
-        else:
-
-            if A.x != B.x:
-                m_red = (B.y - A.y)/(B.x - A.x)
-            else:
-                m_red = 99999999 # Infinite
-
-
-            if A.x != P.x:
-                m_blue = (P.y - A.y)/(P.x - A.x)
-            else:
-                m_blue = 99999999 # Infinite
-
-
-            if m_blue >= m_red:
-                return True
-            else:
-                return False
-
-
-# ------- Implementação do Calculo de chance de colisão
-
-
-def prob_of_fail(x, y, areas):
-    prob_of_fail = 0
-
-    x = # Posição atual do Drone no eixo x
-    y = # Posição atual do Drone no eixo y
-
-    for area in areas:
-        chance = chance_of_collision()
-        prob_of_fail += min(chance, 1)
-
-    prob_of_fail = min(prob_of_fail, 1)
-
-    return prob_of_fail
-
-
-
-def chance_of_collision():
-
-    maior = 
-
-    for lado in polygon:
-        
-        delta_y = 
-        
-
-        exp = (x * delta_y + y * delta_x - b) / R
-        maior = max(exp, maior)
-
-
-
-    Risco = Normal.standardTailProb(maior, false)
-    delta = (1 - Risco) / 2
-
-    return l == inst.L -1 ? 2*delta : delta
-
-
-    return chance
-
-
-
-
-
-# --------
-
-
-for poligono in mapa: # poligono j
-    for aresta in poligono: # aresta i
-
-        normal = (a1, a2, a3, 0, 0, 0)
-
-
-
-
+def Pr_x_E_Z(X, Z):
+    chance = chance_of_collision(X, Z)
+    return min(chance, 1)
 
 

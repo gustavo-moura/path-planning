@@ -39,7 +39,7 @@ class Area():
             e = edge(self.points[i], self.points[i+1])
             edges.append(e)
 
-        e = edge(self.points[qtd], self.points[0])
+        e = edge(self.points[qtd-1], self.points[0])
         edges.append(e)
 
         return edges

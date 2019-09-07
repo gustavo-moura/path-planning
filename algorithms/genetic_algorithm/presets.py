@@ -5,7 +5,8 @@ if nb_dir not in sys.path:
     sys.path.append(nb_dir)
 
 
-import static_pathplanning.pathplanning as pp
+import data_definitions  as pp
+from utils import controller
 
 
 class Map:
@@ -67,9 +68,9 @@ def build_area_C2_penalizadora():
 def build_map_C2():
     geo_home = pp.GeoPoint((-47.932949, -22.002467, 0))
 
-    origem = pp.Controller.to_cartesian(pp.GeoPoint((-47.932546, -22.002237, 15)), geo_home)
+    origem = controller.to_cartesian(pp.GeoPoint((-47.932546, -22.002237, 15)), geo_home)
 
-    destino = pp.Controller.to_cartesian(pp.GeoPoint((-47.932608, -22.002674, 13)), geo_home)
+    destino = controller.to_cartesian(pp.GeoPoint((-47.932608, -22.002674, 13)), geo_home)
 
     b1 = build_area_C2_bonificadora()
     bonificadoras = [b1]
@@ -91,7 +92,7 @@ def build_map_C2():
 
 def transform_geo_points(points, home):
     cartesian_route = [pp.CartesianPoint(point[0], point[1], 10) for point in points]
-    return pp.Controller.transform_geo_points(cartesian_route, home) 
+    return controller.transform_geo_points(cartesian_route, home) 
 
 
 def new_geo_point(tupler):
