@@ -1,0 +1,18 @@
+Este arquivo contém explicações sobre os aquivos json que armazenam informações relevantes para o cenário de VANTs.
+
+ARQUIVOS:
+
+area.json
+	dados sobre definições de áreas geográficas, importante armazenar os dados utilizando pontos geográficos (latitude, longitude, altitude)
+
+map.json
+	dados sobre um mapa. Um mapa é um conjunto de informações que contém regiões bonificadoras, penalizadoras e não-navegáveis, assim como um destino, uma origem e um home. O home é importante para fazer a conversão de geo point para cartesian point. 
+	Os dados das áreas bonificadoras, penalizadoras e não-navegáveis faz referência à area.json. O id descrito aqui é referente ao índice de armazenamento de area.json.
+	(Por segurança e redundância, além do id ser o índice do vetor salvo no arquivo, ele é também um campo numérico).
+	(Neste arquivo as "keys" estão em português porque o algoritmo referencia as regiões em português. Uma convenção dos nomes em inglês ainda não foi realizada.)
+
+drone.json
+	contém as especificações de um drone, como peso, velocidade, bateria, etc.
+
+camera.json
+	contém as especificações de câmeras, como trigger, resolution, etc.

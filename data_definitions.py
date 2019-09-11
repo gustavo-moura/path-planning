@@ -64,6 +64,7 @@ class Camera():
         self.focus_distance = focus_distance
 
 
+
 class CartesianPoint():
 
     id_number = None

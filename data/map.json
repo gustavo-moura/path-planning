@@ -1,0 +1,12 @@
+[
+{
+	"id": 0,
+	"name": "Mapa C2",
+	"geo_home": [-47.932949, -22.002467, 0],
+	"geo_origem": [-47.932546, -22.002237, 15],
+	"geo_destino": [-47.932608, -22.002674, 13],
+	"ids_bonificadoras":[1],
+	"ids_penalizadoras":[2],
+	"ids_nao_navegaveis":[]
+}
+]
