@@ -1,0 +1,1 @@
+docker run --rm -it -v "$(pwd)":/home adnrv/texlive pdflatex progress-19-aug-1.tex
