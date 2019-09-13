@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.6.3)  13 SEP 2019 19:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.6.3)  13 SEP 2019 21:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1054,292 +1054,95 @@ LaTeX Font Info:    Font shape `U/futm/m/n' will be
 LaTeX Warning: Command \textellipsis invalid in math mode on input line 99.
 
 
-LaTeX Warning: Command \textellipsis invalid in math mode on input line 100.
+LaTeX Warning: Command \textellipsis invalid in math mode on input line 101.
 
 
-LaTeX Warning: Command \textellipsis invalid in math mode on input line 105.
+LaTeX Warning: Command \textellipsis invalid in math mode on input line 108.
 
 
-LaTeX Warning: Command \textellipsis invalid in math mode on input line 107.
+LaTeX Warning: Command \textellipsis invalid in math mode on input line 110.
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.128 fitness = f_
-                  pouso_b + f_pouso_p + f_pouso_voo_n + f_viol + f_curvas
-? q
-OK, entering \batchmode...
-! Missing $ inserted.
-<inserted text> 
-                $
-l.129 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
- [1
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/m/n' will be
+(Font)              scaled to size 7.6pt on input line 133.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/m/n' will be
+(Font)              scaled to size 6.0pt on input line 133.
+[1
 
 {/usr/local/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-! Missing $ inserted.
-<inserted text> 
-                $
-l.131 f_
-        pouso_b : pouso em regi√£o bonificadora
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+LaTeX Font Info:    Font shape `TS1/erewhon-TLF/m/n' will be
+(Font)              scaled to size 10.0pt on input line 138.
 
-
-LaTeX Warning: Command \~ invalid in math mode on input line 131.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 133.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 133.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 133.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.134 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (329.97871pt too wide) in paragraph at lines 130--134
-\FML/futmi/m/it/10 Somatoria\T1/futs/m/n/10 (\FML/futmi/m/it/10 Pr\T1/futs/m/n/
-10 (\FML/futmi/m/it/10 xEZ\T1/futs/m/n/10 ))\FML/futmi/m/it/10 Custodepousaremr
-egi\T1/futs/m/n/10 „\FML/futmi/m/it/10 obonificadora\T1/futs/m/n/10 (\FML/futmi
-/m/it/10 Cb\T1/futs/m/n/10 )\FML/futmi/m/it/10 vezesasomat\T1/futs/m/n/10 Û\FML
-/futmi/m/it/10 riadaprobabilidadedepousaremcadaumadasregi\T1/futs/m/n/10 ı\FML/
-futmi/m/it/10 esbonificadoras$ 
+Overfull \hbox (1.05275pt too wide) in paragraph at lines 144--145
+[]\T1/erewhon-TLF/m/n/10 igual a $\FML/futmi/m/it/10 f[]$\T1/erewhon-TLF/m/n/10
+ , porÈm sub-sti-tuÌndo $\FMS/futm/m/n/10 ^^@\FML/futmi/m/it/10 Cb$ \T1/erewhon
+-TLF/m/n/10 por $\FMS/futm/m/n/10 Ä\FML/futmi/m/it/10 Cp$ \T1/erewhon-TLF/m/n/1
+0 (custo de pousar em regi„o
  []
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.135 f_
-        pouso_p : pouso em regi√£o penalizadora
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/bx/n' in size <10> not available
 
-
-LaTeX Warning: Command \~ invalid in math mode on input line 135.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 136.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 136.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 136.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.137 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (15.16246pt too wide) in paragraph at lines 135--137
-[]\T1/erewhon-TLF/m/n/10 f$[]\FML/futmi/m/it/10 ouso[] \T1/futs/m/n/10 : \FML/f
-utmi/m/it/10 pousoemregi\T1/futs/m/n/10 „\FML/futmi/m/it/10 openalizadoraiguala
-f[]ouso[]; por\T1/futs/m/n/10 È\FML/futmi/m/it/10 msubstitu\T1/futs/m/n/10 Ì\FM
-L/futmi/m/it/10 ndo \FMS/futm/m/n/10 ^^@
+(Font)              Font shape `T1/erewhon-TLF/b/n' tried instead on input line
+ 164.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/b/n' will be
+(Font)              scaled to size 10.0pt on input line 164.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/m/it' will be
+(Font)              scaled to size 10.0pt on input line 175.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/bx/it' in size <10> not availabl
+e
+(Font)              Font shape `T1/erewhon-TLF/b/it' tried instead on input lin
+e 175.
+LaTeX Font Info:    Font shape `T1/erewhon-TLF/b/it' will be
+(Font)              scaled to size 10.0pt on input line 175.
+[2]
+Overfull \hbox (2.45712pt too wide) in paragraph at lines 180--181
+[]\T1/erewhon-TLF/m/n/10 onde $\FML/futmi/m/it/10 f[]; f[]; f[]$ \T1/erewhon-TL
+F/m/n/10 eu n„o en-tendi como im-ple-men-tar, por-tanto foi definido
  []
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.139 f_
-        pouso_voo_n : pouso ou voo sobre regi√£o n√£o-naveg√°vel
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+
+LaTeX Warning: Command \' invalid in math mode on input line 200.
 
 
-LaTeX Warning: Command \~ invalid in math mode on input line 139.
+LaTeX Warning: Command \' invalid in math mode on input line 201.
 
 
-LaTeX Warning: Command \~ invalid in math mode on input line 139.
+LaTeX Warning: Command \c invalid in math mode on input line 207.
 
 
-LaTeX Warning: Command \' invalid in math mode on input line 139.
+LaTeX Warning: Command \~ invalid in math mode on input line 207.
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.141 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+[3]
 
-! Missing $ inserted.
-<inserted text> 
-                $
-l.147 f_
-        viol = realiza uma compara√ß√£o de seguran√ßa
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+LaTeX Warning: Empty bibliography on input line 222.
 
-
-LaTeX Warning: Command \c invalid in math mode on input line 147.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 147.
-
-
-LaTeX Warning: Command \c invalid in math mode on input line 147.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 148.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 148.
-
-
-LaTeX Warning: Command \c invalid in math mode on input line 148.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 148.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 148.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 148.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.149 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (852.1485pt too wide) in paragraph at lines 147--149
-[]\T1/erewhon-TLF/m/n/10 f$[]\FML/futmi/m/it/10 iol \FMS/futm/m/n/10 Å \FML/fut
-mi/m/it/10 realizaumacompara\T1/futs/m/n/10 Á„\FML/futmi/m/it/10 odeseguran\T1/
-futs/m/n/10 Á\FML/futmi/m/it/10 aSeaaeronavetemvelocidadefinalmaiordoqueoseuval
-orm\T1/futs/m/n/10 Ì\FML/futmi/m/it/10 nimo; n\T1/futs/m/n/10 „\FML/futmi/m/it/
-10 oocorredefatoumpouso:Dessamaneira; aEqua\T1/futs/m/n/10 Á„\FML/futmi/m/it/10
- o\T1/futs/m/n/10 (\FML/futmi/m/it/10 f[]iol\T1/futs/m/n/10 )\FML/futmi/m/it/10
- evitarotasemqueoVANTn\T1/futs/m/n/10 „\FML/futmi/m/it/10 oconseguepousar; mesm
-oqueatinjaumaregi\T1/futs/m/n/10 „\FML/futmi/m/it/10 obonificadora:$ 
- []
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.150 f_
-        viol =    Cb, se vk - vminimo > 0;
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 151.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.152 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.166 fitness = f_
-                  pouso_b + f_pouso_p + f_pouso_voo_n + f_curvas + f_dist + ...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.167 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.168 onde f_
-             curvas, f_dist e f_bat eu n√£o entendi como implementar, portan...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-LaTeX Warning: Command \~ invalid in math mode on input line 168.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.169 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (111.69179pt too wide) in paragraph at lines 168--169
-[]\T1/erewhon-TLF/m/n/10 onde f$[]\FML/futmi/m/it/10 urvas; f[]istef[]ateun\T1/
-futs/m/n/10 „\FML/futmi/m/it/10 oentendicomoimplementar; portantofoidefinidocom
-oconstante\T1/futs/m/n/10 0\FML/futmi/m/it/10 :$ 
- []
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.176 ...lor √© utilizado para os c√°lculos de: f_
-                                                  pouso_b, f_pouso_p e f_viol
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.177 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
- [2] [3]
-
-LaTeX Warning: Empty bibliography on input line 238.
-
- [4] (./progress-19-aug-1.aux)
+[4] (./progress-19-aug-1.aux)
 Package logreq Info: Writing requests to 'progress-19-aug-1.run.xml'.
 \openout1 = `progress-19-aug-1.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 10776 strings out of 494477
- 184034 string characters out of 6174821
- 601995 words of memory out of 5000000
- 14261 multiletter control sequences out of 15000+600000
- 90507 words of font info for 95 fonts, out of 8000000 for 9000
+ 10793 strings out of 494477
+ 184425 string characters out of 6174821
+ 599995 words of memory out of 5000000
+ 14272 multiletter control sequences out of 15000+600000
+ 103350 words of font info for 105 fonts, out of 8000000 for 9000
  42 hyphenation exceptions out of 8191
  43i,11n,46p,894b,794s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/texliv
-e/texmf-dist/fonts/enc/dvips/erewhon/zut1_iwqvab.enc}{/usr/local/texlive/texmf-
+{/usr/local/texlive/texmf-dist/fonts/enc/dvips/erewhon/zut1_iwqvab.enc}{/usr/
+local/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/texlive/texmf-
 dist/fonts/enc/dvips/erewhon/zut1_q4j5e2.enc}</usr/local/texlive/texmf-dist/fon
 ts/type1/public/erewhon/Erewhon-Bold.pfb></usr/local/texlive/texmf-dist/fonts/t
-ype1/public/erewhon/Erewhon-Regular.pfb></usr/local/texlive/texmf-dist/fonts/ty
-pe1/public/fourier/fourier-ms.pfb></usr/local/texlive/texmf-dist/fonts/type1/ad
-obe/utopia/putr8a.pfb></usr/local/texlive/texmf-dist/fonts/type1/adobe/utopia/p
-utri8a.pfb>
-Output written on progress-19-aug-1.pdf (4 pages, 121094 bytes).
+ype1/public/erewhon/Erewhon-BoldItalic.pfb></usr/local/texlive/texmf-dist/fonts
+/type1/public/erewhon/Erewhon-Regular.pfb></usr/local/texlive/texmf-dist/fonts/
+type1/public/fourier/fourier-mex.pfb></usr/local/texlive/texmf-dist/fonts/type1
+/public/fourier/fourier-mlit.pfb></usr/local/texlive/texmf-dist/fonts/type1/pub
+lic/fourier/fourier-ms.pfb></usr/local/texlive/texmf-dist/fonts/type1/adobe/uto
+pia/putr8a.pfb></usr/local/texlive/texmf-dist/fonts/type1/adobe/utopia/putri8a.
+pfb>
+Output written on progress-19-aug-1.pdf (4 pages, 147735 bytes).
 PDF statistics:
- 42 PDF objects out of 1000 (max. 8388607)
- 30 compressed objects within 1 object stream
+ 54 PDF objects out of 1000 (max. 8388607)
+ 39 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
