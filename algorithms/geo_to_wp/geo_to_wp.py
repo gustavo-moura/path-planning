@@ -15,17 +15,18 @@ def main():
     parser.add_argument('-i',
                         '--input_filename',
                         required=True,
-                        help='input path to file containing lat, long and alt values in a CSV')
+                        help='input path to file containing lat, long and alt values')
 
     #Output path   
     parser.add_argument('-o',
                         '--output_filename',
                         required=True,
-                        help='output path to save file (standard extension is .wp)')
+                        help='output path to save file')
 
     #Output file extension
     parser.add_argument('-e',
                         '--output_extension',
+                        default = 'wp',
                         required=False,
                         help='extension format to output the file (standard is .wp)'
     )
@@ -44,6 +45,7 @@ def main():
                         required=False,
                         help='Quantity of header rows to skip'
     )
+    # -- until here, on the readme
 
     #try:
 
@@ -75,6 +77,7 @@ def execute(args):
     # Read OUTPUT
     if not output_extension:
         output_extension = re.sub(r'([A-Za-z0-9_/ ]+\.{1})', '', output_filename)
+    output_extension = re.sub(r'\.', '', output_extension)
     write_options = {
         'sgl': write_sgl,
         'wp': write_wp
@@ -100,7 +103,7 @@ def execute(args):
 # READ
 # --------------------------------------------------------------------------
 def read_csv(filename, args):
-    df = pd.read_csv(filename, skiprows=args.skiprows)
+    df = pd.read_csv(filename, skiprows=int(args.skiprows))
     geo_route = []
 
     for _, row in df.iterrows():
@@ -114,7 +117,7 @@ def read_csv(filename, args):
 
 
 def read_txt(filename, args):
-    df = pd.read_csv(filename, skiprows=args.skiprows, sep=' ')
+    df = pd.read_csv(filename, skiprows=int(args.skiprows), sep=' ')
     geo_route = []
 
     for _, row in df.iterrows():

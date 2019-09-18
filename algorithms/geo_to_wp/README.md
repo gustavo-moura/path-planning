@@ -1,18 +1,44 @@
 # Geo to WP converter
 
-Algorithm to convert a CSV file to a .WP in the format that the Mavros uses.
+Algorithm to convert a file to another considering a set of rules.
+The main point is to convert .csv to .wp
 
 
 ## Usage
-run the line:
+Examples:
 
 ```
-python3 main.py -i input_file.csv -o output_file
+python3 geo_to_wp.py -i input_file.csv -o output_file -s 1
+
+python3 geo_to_wp.py -i in_2.txt -o out_2_generated.wp -a 13
 ```
 
-OBS: notice that the `-i` file must have the extension declareted and the `-o` must NOT have the extension declareted.
+
+### Parameters
+
+`-i` REQUIRED input path to file containing lat, long and alt values
+
+`-o` REQUIRED output path to save file, either inform a path containing the extension or inform the extension by using the -e parameter
+
+`-e` OPTIONAL extension format to output the file (standard is wp)
+
+`-a` OPTIONAL if this information is not in the input file, you can manually set the maximum altitude
+
+`-s` OPTIONAL quantity of header rows to skip
+
+
 
 ## Files
+
+### Input
+Supported input formats: .csv .txt <s>.kml</s>(not yet supported)
+
+
+### Output
+Supported output formats: .wp <s>.sgl</s>(not yet supported)
+
+
+### Examples
 
 The CSV file should look like this:
 
