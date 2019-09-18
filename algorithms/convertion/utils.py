@@ -1,8 +1,9 @@
+import collections
+
 import math
 
-geo_point = collections.namedtuple('geo_point', 'latitude, longitude, altitude')
-cartesian_point = collections.namedtuple('cartesian_point', 'x, y, z')
-
+GeoPoint = collections.namedtuple('GeoPoint', 'latitude, longitude, altitude')
+CartesianPoint = collections.namedtuple('CartesianPoint', 'x, y, z')
 
 def calc_heading_geo(p1, p2, home):
     c1 = to_cartesian(p1, home)
@@ -33,14 +34,14 @@ def to_geo_point(cartesian_point, home):
     longitude_x = calc_longitude_x(home.latitude, home.longitude, cartesian_point.x)
     latitude_y = calc_latitude_y(home.latitude, cartesian_point.y)
 
-    return GeoPoint((longitude_x, latitude_y, cartesian_point.z))
+    return GeoPoint(latitude_y, longitude_x, cartesian_point.z)
 
 
 def to_cartesian(geo_point, home):
     x = calc_x(geo_point.longitude, home.longitude, home.latitude)
     y = calc_y(geo_point.latitude, home.latitude)
 
-    return CartesianPoint(x, y, geo_point.height)
+    return CartesianPoint(x, y, geo_point.altitude)
 
 
 def to_cartesians(geo_point_list, home):
