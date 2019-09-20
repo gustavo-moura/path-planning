@@ -3,6 +3,7 @@ import collections
 import re
 import json
 
+from fastkml import kml
 import pandas as pd
 
 from utils import GeoPoint, CartesianPoint, transform_geo_points
@@ -172,7 +173,13 @@ def read_txt(filename, point, args):
 
 
 def read_kml(filename, point, args):
-    print('!!! Function under construction !!!')
+    #print('!!! Function under construction !!!')
+
+    with open(filename, 'rt', encoding="utf-8") as file:
+        doc = file.read()
+        k = kml.KML()
+        k.from_string(doc)
+        print(k.to_string(prettyprint=True))
 
     return False
 
@@ -198,21 +205,22 @@ def write_sgl(filename, geo_route):
     with open(filename, 'w+') as file:
         current_waypoint = 1
 
-        file.write('QGC WPL 120\n') # Determines the file version
+        file.write('<number of polygons>\n')
+        file.write(number_of_polygons + '\n')
+		file.write('<number of zona n>\n')
+        file.write(number_of_zona_n + '\n')
+		file.write('<number of zona p>\n')
+        file.write(number_of_zona_p + '\n')
+		file.write('<number of zona b>\n')
+        file.write(number_of_zona_b + '\n')
 
-        for i, geo_point in enumerate(geo_route):
-            file.write(
-                str(i) + '\t'
-                + str(current_waypoint) + '\t' 
-                + '3\t16\t3\t0\t0\t0\t'
-                + '{:10.8f}'.format(geo_point.latitude) + '\t' 
-                + '{:10.8f}'.format(geo_point.longitude) + '\t'
-                + '{:10.8f}'.format(geo_point.altitude) + '\t'
-                + '1'
-                + '\n'
-            )
+        def write_sgl_points(points, zone_type):
+        	for i, point in enumerate(points):
+        		file.write('<x..., y..., n = {}, id = {}, type = {}>\n'.format(?, str(i), zone_type))
 
-            current_waypoint = 0
+        write_sgl_points(points_zona_n, 'n')
+        write_sgl_points(points_zona_p, 'p')
+        write_sgl_points(points_zona_b, 'b')
 
     return True
 
