@@ -1,0 +1,224 @@
+% !TeX document-id = {e3e9adc9-0b17-4199-b894-b6e314b8cf66}
+% !TeX spellcheck = en_US
+% !BIB program = biber 
+\documentclass{article}
+
+%% Encoding
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+%% Fonts
+% Math fonts (fourier) with utopia (erewhon) text fonts
+\usepackage{fourier, erewhon}
+
+%% Setup
+% This package contains logos
+%\usepackage[autoload]{adn}
+
+%\setlogos[
+%\textbf{Laboratório de Computação Reconfigurável}\\%[5pt]
+%\uppercase{Instituto de Ciências Matemáticas e de Computação - USP}\\%[-7pt]
+%]%
+%{IC3D}%
+%{UNICAMP}
+
+%% Transform section references
+\makeatletter
+\renewcommand*{\p@section}{\S\,}
+\renewcommand*{\p@subsection}{\S\,}
+\makeatother
+
+%% Shorthands
+\usepackage{xspace}
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+
+\def\eg{e.g\onedot} \def\Eg{E.g\onedot}
+\def\ie{i.e\onedot} \def\Ie{I.e\onedot}
+\def\cf{cf\onedot} \def\Cf{Cf\onedot}
+\def\etc{etc\onedot} \def\vs{vs\onedot}
+\def\wrt{w.r.t\onedot} \def\dof{d.o.f\onedot}
+\def\etal{et al\onedot}
+\makeatother
+
+%%%
+% Other packages start here (see the examples below)
+%%
+
+%% Figues
+\usepackage{graphicx}
+\graphicspath{{./images-2/}}
+
+
+% References
+% Use this section to embed your bibliography
+% Instead of having a separate file, just place the bibtex entries here
+\usepackage{filecontents}% create files
+\begin{filecontents}{\jobname.bib}
+  @book{FP,
+    title={Computer Vision A Modern Approach},
+    author={David A. Forsyth, Jean Ponce},
+    year={2012},
+    publisher={Pearson}
+  }  
+  @book{SZ,
+    title={Computer Vision: Algorithms and Applications},
+    author={Richard Szeliski},
+    year={2010},
+    publisher={Springer}
+  }
+\end{filecontents}
+% Include bibliography file
+\usepackage[
+backend=biber, 
+style=ieee, 
+natbib=true,
+]{biblatex}
+\addbibresource{\jobname.bib}
+
+
+%% Math
+\usepackage{amsmath}
+
+
+%% Enumerate
+\usepackage{enumitem}
+
+
+\begin{document}
+\title{Algoritmo Genético para Planejadores de Rotas \\
+	\large Relatório de Progresso II}
+\author{Gustavo de Moura Souza\thanks{Número USP 9762981, gustavo.moura.souza@usp.br}}
+
+\maketitle
+
+\section{Indivíduo}
+\subsection{Codificação}
+Seja \(t\) o tamanho do horizonte de planejamento (quantidade de waypoints que deseja-se computar), o DNA do indivíduo é definido por:
+\[dna = [ gene_1, gene_2, … gene_t ] \]
+
+\(gene_i = [ a, e ]\)\hfill para \(i = 1, … t\)
+
+
+onde: \(a\) é o ângulo, e \(e\) a aceleração
+
+
+\subsection{Decodificação}
+seja \(x\) o conjunto de controladores do drone, para \(i = 1, … t\):
+
+\[x = [ (px_1, py_1, v_1, al_1)_1, … (px_t, py_t, v_t, al_t)_t]\]
+
+
+\(px_i\) = : Posição do VANT no eixo x
+ 
+\(py_i\) = : Posição do VANT no eixo y
+
+\(v_i\)  = : Velocidade do VANT na horizontal
+
+\(al_i\) = : ângulo (direção) do VANT na horizontal
+
+
+
+\section{Algoritmo Genético}
+\subsection{Genesis - Criação da População}
+Gera uma população de \(S\) indivíduos. O gene de cada indivíduo é atribuído de acordo com uma função e segue uma distribuição uniforme:
+
+\(a\) = uniformemente distribuído entre \(0.5\) e \(10\)
+
+\(e\) = uniformemente distribuído entre \(0.5\) e \(2\pi\)
+
+\subsection{Evaluation - Computar o Valor do Fitness}
+Função de fitness sendo utilizada:
+\[fitness = f_{pouso\_b} + f_{pouso\_p} + f_{pouso\_voo\_n} + f_{viol} + f_{curvas}\]
+
+onde:
+
+\begin{itemize}
+	\item \(f_{pouso\_b}\) : pouso em região bonificadora
+	\[f_{pouso\_b}(x_K, mapa) = - Cb \cdot \sum(Pr(x \in Z) )\]
+	Custo de pousar em região bonificadora \(Cb\) vezes a somatória da probabilidade de pousar em cada uma das regiões bonificadoras
+	
+	\item \(f_{pouso\_p}\) : pouso em região penalizadora
+	
+	igual a \(f_{pouso\_b}\), porém substituíndo \(-Cb\) por \(+Cp\) (custo de pousar em região penalizadora)
+	
+	\item \(f_{pouso\_voo\_n}\) : pouso ou voo sobre região não-navegável
+	\[f_{pouso\_voo\_n} = Cn \cdot max(0 , calc)\]
+	\[calc = 1 - delta - \sum(Pr(x \notin Z))\]
+	
+	Um menos delta menos somatória da somatória das probabilidades de cada um dos \(x\) não pertencer à cada uma das regiões de \(Zn\)  (loop for duplo, para cada um do controlador \(x\) a cada uma das regiões \(Zn\)), onde \(Zn\) é a região definida como não-navegável.
+	
+	\item \(f_{viol}\) = realiza uma comparação de segurança
+	
+	Se a aeronave tem velocidade final maior do que o seu valor mínimo, não ocorre de fato um pouso. Dessa maneira, a Equação \(f_{viol}\) evita rotas em que o VANT não consegue pousar, mesmo que atinja uma região bonificadora.
+	
+	\item \(f_{viol}=Cb\) , se \(vk - vminimo > 0\); 
+	\(0\), caso contrário
+	
+	note que nesse caso o \(Cb\) está positivo, aumentando muito o valor do fitness. Lembrando que o objetivo é minizar o fitness, ou seja, quanto menor o fitness, melhor.
+	
+
+\end{itemize}
+
+\subsubsection{Probability}
+
+	\(Pr(x \in Z) \) e \(Pr(x \notin Z) \), Probabilidade de x pertencer ou não à uma região Z:
+	
+Seja \(x\) o elemento decodificado (definido no ínicio) utiliza-se a posição cartesiana \(px\) e \(py\) para definir um ponto. Ponto este representando a posição do drone no espaço. Seja uma região composta por 4 ou mais pontos geográficos (que são convertidos para cartesiano para efeito de cálculo) definindo assim uma área.
+
+A probabilidade é:
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+\vspace{5mm} %5mm vertical space
+\textit{\textbf{OBS 1}}: 
+
+Segundo a tese do Jesimar, a função de fitness completa seria:
+\[fitness = f_{pouso\_b} + f_{pouso\_p} + f_{pouso\_voo\_n} + f_{viol} + f_{curvas} + f_{dist} + f_{bat}\]
+
+onde \(f_{curvas}, f_{dist}, f_{bat}\) eu não entendi como implementar, portanto foi definido como constante \(0\).
+
+
+\vspace{5mm} %5mm vertical space
+
+\textit{\textbf{OBS 2}}:
+
+Em alguns momentos é utilizado o valor \(K\). Segundo a tese, \(K\) é o instante de tempo em que o drone sofre um acidente e entra em modo de recalcular a rota.
+Como essa situação não é prevista na implementação do meu algorítimo, \(K\)  é igual ao valor de \(t\). Ou seja, a posição final do drone.
+Esse valor é utilizado para os cálculos de:  \(f_{pouso\_b}\), \(f_{pouso\_p}\) e \(f_{viol}\) 
+
+
+
+\subsection{Selection}
+O indivíduo com melhor (menor) valor de fitness é selecionado, chamado de “melhor de todos”
+
+
+\subsection{Crossover}
+Seguindo o modelo de o melhor cruza com todos. É realizada a média entre os valores dos pais, para determinar os valores do filho.
+Segue a expressão para cada um dos genes do DNA:
+\[a_i^{filho} = ( a_i^{melhor} + a_i^{indivíduo}) / 2\]
+\[e_i^{filho} = ( e_i^{melhor} + e_i^{indivíduo}) / 2\]
+\[gene_i^{filho} = ( a_i^{filho}, e_i^{filho})\]
+
+
+\subsection{Mutation}
+O passo de mutação é realizado sobre cada um dos genes dos novos indivíduos, seguindo a expressão:
+\[a = a + taxa\_mutação \cdot var\]
+
+onde \(var = 1 ou -1\), selecionado aleatoriamente
+
+ou seja, a mutação soma ou subtrai um pequeno valor constante definido inicialmente
+
+verificar se acrescimo ou descrescimo, excede o range do limite
+
+
+\subsection{Extintion}
+A população que já procriou é extinguida, exceto pelo melhor indíviduo, onde ele será perpetuado para a próxima geração. A nova geração de t-1 indivíduos com o melhor de todos segue a vida para a próxima época.
+
+Por motivos de segurança, é guardada a linhagem dos “melhor de todos”, sempre mantendo um histórico.
+
+
+\printbibliography
+
+\end{document}
