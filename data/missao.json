@@ -1,0 +1,32 @@
+[
+{
+    "id": 1,
+    "name": "Missao inicial de teste, USP C2",
+    "map": 0,
+    "mission_execution": [
+        {
+            "command": "navigate",
+            "instructions": {
+                "geo_origin": [-47.932546, -22.002237, 15],
+                "geo_destination": [-47.932608, -22.002674, 13]
+            }
+        },
+        {
+            "command": "fill",
+            "instructions": {
+                "area": {
+                    "geo_points":[
+                            [-47.932749, -22.002332, 7], 
+                            [-47.932794, -22.002177, 13], 
+                            [-47.932664, -22.002147, 13], 
+                            [-47.932612, -22.002306, 7]
+                    ]
+                }
+            }
+        },
+        {
+            "command": "RTL"
+        }
+    ]
+}
+]
