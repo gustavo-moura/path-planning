@@ -8,7 +8,11 @@ def pairwise_circle(iterable):
     first_value = next(b, None)
     return itertools.zip_longest(a, b,fillvalue=first_value)
 
-
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 # Ray Casting Algorithm
 # _________________________________________________________________________________________________
