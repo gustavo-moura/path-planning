@@ -1,6 +1,7 @@
 # Versão do Algoritmo Genético: v2_3
 
 import rospy
+from GA_Planner.srv import *
 
 import argparse
 
@@ -30,17 +31,28 @@ def build_sample_map():
 	return mapa
 
 
-def run_genetic():
+def run_genetic(req):
 	
 	## ENTRADA
 
-	#mapa = build_sample_map()
+	# Parâmetros recebidos (arquivo .srv)
+	origin_lat       = req.origin_lat
+	origin_long      = req.origin_long
+	origin_alt       = req.origin_alt
+	destination_lat  = req.destination_lat
+	destination_long = req.destination_long
+	destination_alt  = req.destination_alt
+	missao_id        = req.mission_id
 
-	# TODO: Receber essas três variáveis como parâmetros na chamada do ROS node
-	missao_filename = 'C:\\Projetos\\path-planning\\data\\missao.json'
-	missao_id=0
-	mapa_filename = 'C:\\Projetos\\path-planning\\data\\mapa.json'
-	mapa, geo_home = read_mission(missao_filename, missao_id, mapa_filename)
+	# Leitura do arquvio em DATA
+	geo_home, _, _, areas_n = read_mapa('~/Data/mapa.json', mapa_id)
+
+	cart_origin      = geo_to_cart(GeoPoint(origin_lat, origin_long, origin_alt), geo_home)
+	cart_destination = geo_to_cart(GeoPoint(destination_lat, destination_long, destination_alt), geo_home)
+
+
+    mapa = Mapa(cart_origin, cart_destination, areas_n, inflation_rate=0.1)
+
 
 
 	## EXECUÇÃO DO AG
@@ -57,23 +69,28 @@ def run_genetic():
 	)
 
 	best = ag.run(info=True)
+
+	# Melhor rota encontrada : WPs em cartesiano
 	cart_points = best.get_route()
+
+	# Melhor rota encontrada : WPs em geográfico
+	geo_points = [ Conversor.list_cart_to_geo(cart_points, geo_home) ]
+
 
 
 	## SAÍDA
 
-	# TODO: Receber variável output_filename como parâmetro na chamada do ROS node
-	output_filename = './output.wp'
-	save_genetic_output(output_filename, cart_points, geo_home)
+	output_filename = '~/Mission/path_from_ga_output.wp'
+	write_mavros(output_filename, geo_points)
 
 
-	return 
+	return GA_PlannerResponse(output_filename)
 
 
 def genetic_server():
 	rospy.init_node('genetic_server')
-	s = rospy.Service('genetic', AddTwoInts, run_genetic)
-	print "Running Genetic Algorithm to Path-Planning"
+	s = rospy.Service('genetic', GA_Planner, run_genetic)
+	print ("Running Genetic Algorithm to Path-Planning")
 	rospy.spin()
 
 

@@ -1,0 +1,9 @@
+float32 origin_lat
+float32 origin_long
+float32 origin_alt
+float32 destination_lat
+float32 destination_long
+float32 destination_alt
+int32 mission_id
+---
+string wp_path

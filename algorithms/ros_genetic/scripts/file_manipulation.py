@@ -4,6 +4,8 @@ import genetic_v2_3 as genetic
 
 from data_definitions import Conversor, Mapa
 
+# READ
+# ______________________________________________
 
 def read_mission(missao_filename, missao_id, mapa_filename):
 	
@@ -28,10 +30,23 @@ def read_mission(missao_filename, missao_id, mapa_filename):
 	return mapa
 
 
-def save_genetic_output(filename, cart_points, geo_home):
-	geo_points = [ Conversor.list_cart_to_geo(cart_points, geo_home) ]
-	write_mavros(filename, geo_points)
+def read_mapa(mapa_filename, mapa_id):
+    
+    with open(mapa_filename, 'r') as mapa_file:
+        mapa_file = json.load(mapa_file)
 
+        geo_home = mapa[mapa_id]['geo_home']
+  
+        areas_bonificadoras  = [ Conversor.list_geo_to_cart(mapa_file[mapa_id]['areas_bonificadoras']['geo_points'], geo_home)  ]
+        areas_penalizadoras  = [ Conversor.list_geo_to_cart(mapa_file[mapa_id]['areas_penalizadoras']['geo_points'], geo_home)  ]
+        areas_nao_navegaveis = [ Conversor.list_geo_to_cart(mapa_file[mapa_id]['areas_nao_navegaveis']['geo_points'], geo_home) ]
+   
+
+    return geo_home, areas_bonificadoras, areas_penalizadoras, areas_nao_navegaveis
+
+
+# WRITE
+# ______________________________________________
 
 def write_mavros(filename, geo_points): #throws FileNotFoundException
 	print('Writing mavros file...\nMake sure the filename given has the .wp extension')
