@@ -28,6 +28,14 @@ Entrega: 11/10 (Sexta)
 Reunião 11/10 (Sexta)
 
 
+Versão 2_3:
+Junção das versões 2 com 3
+
+
+Versão 3.5:
+Adicionada alocação de risco como definida pelo Marcio
+
+
 Versão 4:
 Planejamento em 3D
 - Adaptar o algoritmo para considerar o mapa, rotas e dna em 3 dimensões, adicionando a altura
