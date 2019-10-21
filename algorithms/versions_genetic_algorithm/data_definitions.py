@@ -15,7 +15,6 @@ class Mapa():
         
     def _inflate_area(self, area, inflation_rate=0):
         # Infla uma área retangular em uma porcentagem do tamanho, alterando os valores em x% de cada vértice
-        
         x = area[2].x - area[0].x
         y = area[1].y - area[3].y
         
@@ -33,32 +32,33 @@ class Mapa():
         return new_area
 
 
+
 class Conversor():
 
-    def list_geo_to_cart(self, l, geo_home):
+    def list_geo_to_cart( l, geo_home):
         for i in l:
-            yield self.geo_to_cart(i, geo_home)
+            yield Conversor.geo_to_cart(i, geo_home)
 
-    def list_cart_to_geo(self, l, geo_home):
+    def list_cart_to_geo( l, geo_home):
         for i in l:
-            yield self.cart_to_geo(i, geo_home)
+            yield Conversor.cart_to_geo(i, geo_home)
 
 
-    def geo_to_cart(self, geo_point, geo_home):
+    def geo_to_cart( geo_point, geo_home):
         
         def calc_y(lat, lat_):
             return (lat - lat_) * (10000000.0 / 90)
         def calc_x(longi, longi_, lat_):
             return (longi - longi_) * (6400000.0 * (math.cos(lat_ * math.pi / 180) * 2 * math.pi / 360))
 
+        x = calc_x(geo_point.longitude, geo_home.longitude, geo_home.latitude)
+        y = calc_y(geo_point.latitude, geo_home.latitude)
 
-        x = calc_x(geo_point.longitude, home.longitude, home.latitude)
-        y = calc_y(geo_point.latitude, home.latitude)
-
-        return CartesianPoint(x, y, geo_point.altitude)
+        #return CartesianPoint(x, y, geo_point.altitude)
+        return CartesianPoint(x, y)
 
 
-    def cart_to_geo(self, cartesian_point, geo_home):
+    def cart_to_geo( cartesian_point, geo_home):
 
         def calc_latitude_y(lat_, y):
             return ((y * 90) / 10000000.0) + lat_
@@ -66,7 +66,8 @@ class Conversor():
             return ((x * 90) / (10008000 * math.cos(lat_ * math.pi / 180))) + longi_
 
 
-        longitude_x = calc_longitude_x(home.latitude, home.longitude, cartesian_point.x)
-        latitude_y = calc_latitude_y(home.latitude, cartesian_point.y)
+        longitude_x = calc_longitude_x(geo_home.latitude, geo_home.longitude, cartesian_point.x)
+        latitude_y = calc_latitude_y(geo_home.latitude, cartesian_point.y)
 
-        return GeoPoint((longitude_x, latitude_y, cartesian_point.z))
+        #return GeoPoint(longitude_x, latitude_y, cartesian_point.z)
+        return GeoPoint(longitude_x, latitude_y, 10)
