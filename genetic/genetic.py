@@ -5,22 +5,27 @@ import copy
 
 from math import cos, sin, sqrt, ceil
 
-from itertools import tee
-from utils import pairwise, point_in_polygon, segment_in_polygon, _distance_wp_area, _prob_collision, boundary
-from data_definitions import CartesianPoint, Version
+from genetic.utils import (
+    pairwise,
+    point_in_polygon,
+    segment_in_polygon,
+    _distance_wp_area,
+    _prob_collision,
+    boundary,
+)
+from genetic.data_definitions import CartesianPoint, Version
 
-Gene = collections.namedtuple('Gene', 'a e')
-GeneDecoded = collections.namedtuple('GeneDecoded', 'x y v al')
+Gene = collections.namedtuple("Gene", "a e")
+GeneDecoded = collections.namedtuple("GeneDecoded", "x y v al")
 
 
-class Subject():
-    
+class Subject:
+
     # codificação - u
     # dna = [Gene, ...]
     #     Gene = [a, e]
     #         a = float: aceleração
     #         e = float: variação angular
-
 
     # decodificação - x
     # dna_decoded = [GeneDecoded, ...]
@@ -31,13 +36,13 @@ class Subject():
     #         al = : ângulo (direção) do VANT na horizontal
     def __init__(
         self,
-        px0=10.,
-        py0=10.,
+        px0=10.0,
+        py0=10.0,
         v0=0,
         al0=0,
         v_min=11.1,
         v_max=30.5,
-        e_min=-3,        
+        e_min=-3,
         e_max=3,
         a_min=-2.0,
         a_max=2.0,
@@ -48,247 +53,237 @@ class Subject():
         m=743.0,
         mutation_prob=0.7,
         start_time=None,
-        spawn_mode='random',
+        spawn_mode="random",
         version=None,
-        **kwargs
+        **kwargs,
     ):
         # VANT
         # px0   int : Posição inicial no eixo x (m)
         # py0   int : Posição inicial no eixo y (m)
         # v0    int : Velocidade Inicial (m/s)
         # al0   int : Ângulo inicial (graus)
-        self.gene_decoded_0 = GeneDecoded(px0, py0, v0, al0) # GeneDecoded : objeto contendo o gene decodificado de posição 0
-        self.v_min = v_min # float : Velocidade máxima (m/s)
-        self.v_max = v_max # float : Velocidade mínima (m/s)
-        self.e_min = e_min # int   : Velocidade angular mínima (graus/s)
-        self.e_max = e_max # int   : Velocidade angular máxima (graus/s)
-        self.a_min = a_min # float : Aceleração mínima (m/s**2)
-        self.a_max = a_max # float : Aceleração máxima (m/s**2)
-                
+        self.gene_decoded_0 = GeneDecoded(
+            px0, py0, v0, al0
+        )  # GeneDecoded : objeto contendo o gene decodificado de posição 0
+        self.v_min = v_min  # float : Velocidade máxima (m/s)
+        self.v_max = v_max  # float : Velocidade mínima (m/s)
+        self.e_min = e_min  # int   : Velocidade angular mínima (graus/s)
+        self.e_max = e_max  # int   : Velocidade angular máxima (graus/s)
+        self.a_min = a_min  # float : Aceleração mínima (m/s**2)
+        self.a_max = a_max  # float : Aceleração máxima (m/s**2)
+
         # Modelo
-        self.T_min   = T_min   # int : Valor mínimo para o horizonte de planejamento
-        self.T_max   = T_max   # int : Valor máximo para o horizonte de planejamento
-        self.delta_T = delta_T # int : Discretização do tempo (s) Tempo que leva de um waypoint até o outro
-        self.m       = m       # float : Massa do VANT (!=0) (gramas)
-    
+        self.T_min = T_min  # int : Valor mínimo para o horizonte de planejamento
+        self.T_max = T_max  # int : Valor máximo para o horizonte de planejamento
+        self.delta_T = delta_T  # int : Discretização do tempo (s) Tempo que leva de um waypoint até o outro
+        self.m = m  # float : Massa do VANT (!=0) (gramas)
+
         # Parametros do indivíduo
-        self.mutation_prob = mutation_prob # float : Probabilidade de ocorrer uma mutação no dna (%)
-        self.fitness       = None          # float : Fitness do indivíduo
-        #self.birth_time    = None          # time  : Hora que o indivíduo é criado
-        self.dna           = None          # list  : Conjunto de genes formando o DNA ([Gene, ...])
-        self.dna_decoded   = None          # list  : DNA decodificado ([GeneDecoded, ...])
-        self.spawn_mode    = spawn_mode    # str   : Tipo de incialização do DNA {'random'}
-        self.start_time    = start_time    # time  : a hora em que o genético começou a rodar
+        self.mutation_prob = (
+            mutation_prob  # float : Probabilidade de ocorrer uma mutação no dna (%)
+        )
+        self.fitness = None  # float : Fitness do indivíduo
+        # self.birth_time    = None          # time  : Hora que o indivíduo é criado
+        self.dna = None  # list  : Conjunto de genes formando o DNA ([Gene, ...])
+        self.dna_decoded = None  # list  : DNA decodificado ([GeneDecoded, ...])
+        self.spawn_mode = spawn_mode  # str   : Tipo de incialização do DNA {'random'}
+        self.start_time = start_time  # time  : a hora em que o genético começou a rodar
 
         assert version, 'Algorithm version must be informed!\nEx: Version("alpha","RC")'
-        if version.major == 'alpha': # Sem otimização em T
+        if version.major == "alpha":  # Sem otimização em T
             self.T = T
+            self.mutation_choices = [self._mutation_creep, self._mutation_change]
+        elif version.major == "beta":  # Com otimização em T
+            self.T = random.randint(
+                T_min, T_max
+            )  # int : Horizonte de planejamento (quantidade de waypoints)
             self.mutation_choices = [
-                self._mutation_creep, 
-                self._mutation_change
-            ]
-        elif version.major == 'beta': # Com otimização em T
-            self.T = random.randint(T_min, T_max) # int : Horizonte de planejamento (quantidade de waypoints)
-            self.mutation_choices = [
-                self._mutation_remove, 
-                self._mutation_insert, 
-                self._mutation_creep, 
-                self._mutation_change
+                self._mutation_remove,
+                self._mutation_insert,
+                self._mutation_creep,
+                self._mutation_change,
             ]
         else:
-            raise Exception(f'Version {version.major} not identified')
-
+            raise Exception(f"Version {version.major} not identified")
 
         self.spawn(mode=spawn_mode)
-        
-    
+
     def set_fitness(self, fitness, fitness_trace, birth_time):
         self.fitness = fitness
         self.fitness_trace = fitness_trace
-        #self.birth_time = birth_time
-    
-    
+        # self.birth_time = birth_time
+
     # ---
-    
+
     def spawn(self, mode):
-        self.dna = [self._build_gene(mode) for _ in range(self.T) ]
-        
-    def _build_gene(self, mode='random'):
+        self.dna = [self._build_gene(mode) for _ in range(self.T)]
+
+    def _build_gene(self, mode="random"):
         # Inicialização aleatória gera valores com distribuição uniforme
-        if mode == 'random':
+        if mode == "random":
             a = random.uniform(self.a_min, self.a_max)
             e = random.uniform(self.e_min, self.e_max)
-            
+
         return Gene(a, e)
-    
+
     # ---
-    
+
     def decode(self):
-        #self.dna_decoded = [self._decode_gene() for i in range(len(self.dna))]
-        self.dna_decoded = self._decode_gene() # TODO: Organizar, voltar como era a linha de cima. Fazer função abaixo só computar o gene
+        # self.dna_decoded = [self._decode_gene() for i in range(len(self.dna))]
+        self.dna_decoded = (
+            self._decode_gene()
+        )  # TODO: Organizar, voltar como era a linha de cima. Fazer função abaixo só computar o gene
         self.birth_time = time.time() - self.start_time
 
     def _decode_gene(self):
-               
+
         # parametros
         dna = self.dna
         delta_T = self.delta_T
         m = self.m
-        
+
         dna_decoded = []
         dna_decoded.append(self.gene_decoded_0)
-        
+
         for i in range(0, len(dna)):
             # dna
-            a  = dna[i].a
-            e  = dna[i].e
-            
+            a = dna[i].a
+            e = dna[i].e
+
             # dna decodificado
             px = dna_decoded[i].x
             py = dna_decoded[i].y
-            v  = dna_decoded[i].v
+            v = dna_decoded[i].v
             al = dna_decoded[i].al
-            
+
             F = self.__F(v)
-        
+
             # Equações descritas em (Arantes 2016)
-            _px = px + ( v * cos(al) * delta_T ) + ( a * cos(al) * ((delta_T**2)/2) ) 
-            _py = py + ( v * sin(al) * delta_T ) + ( a * sin(al) * ((delta_T**2)/2) ) 
-            _v  = v  + ( a * delta_T ) - ( (F/m) * delta_T )
-            _al = al + ( e * delta_T )
+            _px = px + (v * cos(al) * delta_T) + (a * cos(al) * ((delta_T ** 2) / 2))
+            _py = py + (v * sin(al) * delta_T) + (a * sin(al) * ((delta_T ** 2) / 2))
+            _v = v + (a * delta_T) - ((F / m) * delta_T)
+            _al = al + (e * delta_T)
 
             dna_decoded.append(GeneDecoded(_px, _py, _v, _al))
 
         return dna_decoded
-    
-    
+
     def __F(self, v):
         # Equação do Arrasto
         # Disponível em https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%A3o_do_arrasto
         # Versão utilizada ((Arantes, 2016) equação 3.5)
-        
-        Cd  = 0.8     # float : Coeficiente de arrasto, específico para cada aeronave
-                      #         (considerado Angled Cube) obtido de https://pt.wikipedia.org/wiki/Coeficiente_de_resist%C3%AAncia_aerodin%C3%A2mica
-        rho = 1.225   # float : Massa específica do fuído (aka densidade) (k/m**3)
-                      #         (a 15 graus Celsius) Valor de rho obtido de https://pt.m.wikipedia.org/wiki/Densidade_do_ar
-        A = 1.0       # float : Área de referência # TODO: o que é isso?
+
+        Cd = 0.8  # float : Coeficiente de arrasto, específico para cada aeronave
+        #         (considerado Angled Cube) obtido de https://pt.wikipedia.org/wiki/Coeficiente_de_resist%C3%AAncia_aerodin%C3%A2mica
+        rho = 1.225  # float : Massa específica do fuído (aka densidade) (k/m**3)
+        #         (a 15 graus Celsius) Valor de rho obtido de https://pt.m.wikipedia.org/wiki/Densidade_do_ar
+        A = 1.0  # float : Área de referência # TODO: o que é isso?
         # v = v       # float : Velocidade do Vant no instante t (fornecido como parâmetro da função)
-        
-        F = 0.5 * Cd * rho * A * (v**2)
-        
+
+        F = 0.5 * Cd * rho * A * (v ** 2)
+
         return F
-        
-    
+
     # ---
-    
+
     def crossover(self, parent2):
         dna = random.choice([self._OX, self._BLX_Alpha])(self.dna, parent2.dna)
         dna = self._complete(dna, self.dna, parent2.dna)
         child = self.generate(dna)
         return child
-    
-    
+
     def _complete(self, dna, dna1, dna2):
         # Adiciona os genes restantes da diferença de tamanho entre os dois DNAs
-               
+
         if len(dna1) > len(dna2):
-            bigger  = dna1
+            bigger = dna1
             smaller = dna2
         else:
-            bigger  = dna2
+            bigger = dna2
             smaller = dna1
 
-    
-        for i in range(len(smaller)-1, len(bigger)-1):
+        for i in range(len(smaller) - 1, len(bigger) - 1):
             if random.random() < 0.5:
                 dna.append(bigger[i])
-                
+
         return dna
-        
-    
+
     def _OX(self, dna1, dna2):
         dna = []
         for gene1, gene2 in zip(dna1, dna2):
             dna.append(random.choice([gene1, gene2]))
         return dna
-        
-        
+
     def _BLX_Alpha(self, dna1, dna2):
         dna = []
         for gene1, gene2 in zip(dna1, dna2):
             a = self.__BLX_ALpha_select_gene(gene1.a, gene2.a)
             e = self.__BLX_ALpha_select_gene(gene1.e, gene2.e)
 
-
             a = boundary(a, self.a_min, self.a_max)
             e = boundary(e, self.e_min, self.e_max)
 
             gene = Gene(a, e)
             dna.append(gene)
-            
+
         return dna
-    
-    
+
     def __BLX_ALpha_select_gene(self, x, y):
         # x - Gene : gene do pai 1
         # y - Gene : gene do pai 2
-        alpha = random.uniform(0,1)
-        d = abs(x-y)
-        u = random.uniform(min(x,y)-alpha*d, max(x,y)+alpha*d)
+        alpha = random.uniform(0, 1)
+        d = abs(x - y)
+        u = random.uniform(min(x, y) - alpha * d, max(x, y) + alpha * d)
         return u
-    
-    
+
     def generate(self, dna):
         # Cria um filho com os mesmos parametros do pai, mas com um dna fornecido
         child = copy.deepcopy(self)
         child.dna = dna
         child.decode()
         return child
-    
-        
+
     # ---
-    
+
     def mutation(self, mutation_prob=None):
-        mutation_prob = self.mutation_prob if not mutation_prob else mutation_prob # 0.7
-        
+        mutation_prob = (
+            self.mutation_prob if not mutation_prob else mutation_prob
+        )  # 0.7
+
         # Tem uma probabilidade mutation_prob de mutar o gene ou não
         if random.random() < mutation_prob:
             # Seleciona aleatoriamente uma das formas de mutação
             new_dna = random.choice(self.mutation_choices)(self.dna)
             # mutation_choices = [
-            #     self._mutation_remove, 
-            #     self._mutation_insert, 
-            #     self._mutation_creep, 
+            #     self._mutation_remove,
+            #     self._mutation_insert,
+            #     self._mutation_creep,
             #     self._mutation_change
             # ]
-            
-            
+
             self.dna = new_dna
             self.decode()
-            
+
             return True
         return False
 
-    
     def _mutation_remove(self, dna):
         # Remove UM gene aleatório do DNA
-        if len(dna) > self.T_min:
-            i = random.randint(0, len(dna)-1)
+        if len(dna) > self.T_min+1:
+            i = random.randint(0, len(dna) - 1)
             dna.pop(i)
             return dna
         return None
-        
-        
+
     def _mutation_insert(self, dna):
         # Insere UM gene aleatório no DNA em uma posição aleatória
         if len(dna) < self.T_max:
-            i = random.randint(0, len(dna)-1)
+            i = random.randint(0, len(dna) - 1)
             gene = self._build_gene()
             dna.insert(i, gene)
             return dna
         return None
-    
-    
+
     def _mutation_creep(self, dna):
         # Muta em um pequeno valor aleatorio todos os genes
         new_dna = []
@@ -299,41 +294,37 @@ class Subject():
             new_dna.append(Gene(a, e))
 
         return new_dna
-    
 
     def _mutation_change(self, dna):
         # Reinicia um gene aleatoriamente
         new_dna = []
         for gene in dna:
             if random.random() < 0.5:
-                new_dna.append(self._build_gene('random'))
+                new_dna.append(self._build_gene("random"))
             else:
                 new_dna.append(gene)
-        
+
         return new_dna
-            
-        
+
     def __mute(self, val, min_val, max_val):
-        mutation_rate = random.uniform(0, max_val*0.5)
+        mutation_rate = random.uniform(0, max_val * 0.5)
         s = random.choice([1, -1])
         val = val * (1 + (mutation_rate * s))
 
         val = boundary(val, min_val, max_val)
 
         return val
-    
-    
-    # ---
-    
-    def get_route(self):
-        return [ [gene.x, gene.y] for gene in self.dna_decoded ]
-    
 
-class Genetic():
-    
+    # ---
+
+    def get_route(self):
+        return [[gene.x, gene.y] for gene in self.dna_decoded]
+
+
+class Genetic:
     def __init__(
-        self, 
-        Specie, 
+        self,
+        Specie,
         map,
         taxa_cross=1.0,
         population_size=100,
@@ -347,144 +338,162 @@ class Genetic():
         k_tournament=2,
         gps_imprecision=1,
         big_delta=1,
-        version=Version('alpha','RC'),
-        **kwargs
+        version=Version("alpha", "RC"),
+        **kwargs,
     ):
         # Modelo
-        self.Specie = Specie # objeto : Definição da classe (não a instância)
-        self.map   = map   # map   : map com as características da missão
+        self.Specie = Specie  # objeto : Definição da classe (não a instância)
+        self.map = map  # map   : map com as características da missão
 
         # Parâmetros
-        self.taxa_cross      = taxa_cross      # float : Taxa de ocorrencia do crossover [0,1]
-        self.population_size = population_size # int   : Quantidade máxima de indivíduos na população 
-        self.C_d             = C_d             # int   : Custo associado ao fitness de destino
-        self.C_obs           = C_obs           # int   : Custo associado ao fitness de obstáculos
-        self.C_con           = C_con           # int   : Custo associado ao fitness de consumo de combustível
-        self.C_cur           = C_cur           # int   : Custo associado ao fitness de curvatura da rota
-        self.C_t             = C_t             # int   : Custo associado ao fitness do tamanho do DNA (T ou horizonte de planejamento)
-        self.max_exec_time   = max_exec_time   # float : Tempo máximo de execução - Stop criteria (segundos)
-        self.min_precision   = min_precision   # float : Precisão mínima de acerto ao destino (metros)
-        self.k_tournament    = k_tournament    # int   : Quantidade de indivíduos disputando o torneio
-        self.gps_imprecision = gps_imprecision # float : Imprecisão do GPS (metros)
-        self.big_delta       = big_delta
-        
+        self.taxa_cross = taxa_cross  # float : Taxa de ocorrencia do crossover [0,1]
+        self.population_size = (
+            population_size  # int   : Quantidade máxima de indivíduos na população
+        )
+        self.C_d = C_d  # int   : Custo associado ao fitness de destino
+        self.C_obs = C_obs  # int   : Custo associado ao fitness de obstáculos
+        self.C_con = (
+            C_con  # int   : Custo associado ao fitness de consumo de combustível
+        )
+        self.C_cur = C_cur  # int   : Custo associado ao fitness de curvatura da rota
+        self.C_t = C_t  # int   : Custo associado ao fitness do tamanho do DNA (T ou horizonte de planejamento)
+        self.max_exec_time = (
+            max_exec_time  # float : Tempo máximo de execução - Stop criteria (segundos)
+        )
+        self.min_precision = (
+            min_precision  # float : Precisão mínima de acerto ao destino (metros)
+        )
+        self.k_tournament = (
+            k_tournament  # int   : Quantidade de indivíduos disputando o torneio
+        )
+        self.gps_imprecision = gps_imprecision  # float : Imprecisão do GPS (metros)
+        self.big_delta = big_delta
+
         # Versionamento
         self.version = version
 
         # Alguns dos valores do kwargs são passados para a instanciação dos indivíduos
         self.kwargs = kwargs
-        
+
         # Inicialização
-        self.population = None 
-        self.fitnesses  = None
-        self.best       = None
-        self.ancestry   = []
-        
+        self.population = None
+        self.fitnesses = None
+        self.best = None
+        self.ancestry = []
 
-       
-
-        
     def run(self, max_exec_time=None, verbose=False, info=False, debug=False):
         self.max_exec_time = max_exec_time if max_exec_time else self.max_exec_time
-        
+
         # Acompanhamento do tempo (critério de parada)
         self.start_time = time.time()
-        
+
         # Genesis
         self.population = self._genesis(self.Specie, self.population_size)
-        
+
         # Inicializar
         self._decode(self.population)
-        
+
         # Avaliar
-        self.fitnesses = [self._fitness(subject, self.map) for subject in self.population]
-    
+        self.fitnesses = [
+            self._fitness(subject, self.map) for subject in self.population
+        ]
+
         # Escolher melhor de todos
         self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
-        
-        
+
         self.trace = []
-        
+
         while not self.stop_criteria():
             self.flag_newborn = self.population_size
             count_while = 0
-            
+
             while not self.converge():
                 self.flag_newborn = 0
                 count_while += 1
-                
+
                 for _ in range(ceil(self.taxa_cross * self.population_size)):
                     # Seleção por torneio
-                    parent1, parent2 = self._tournament(self.population, k=self.k_tournament)
-            
+                    parent1, parent2 = self._tournament(
+                        self.population, k=self.k_tournament
+                    )
+
                     # Crossover
                     child = parent1.crossover(parent2)
-                    
+
                     # Mutação
                     child.mutation()
-                    
+
                     # Fitness
                     self._fitness(child, self.map)
-                    
+
                     # Adicionar filho na população
                     self._insert(child, parent1, parent2)
-                    
+
                     # Print
                     if verbose and self.flag_newbest:
-                        print('  Novo melhor de todos! fit: {}'.format(self.best.fitness))
+                        print(
+                            "  Novo melhor de todos! fit: {}".format(self.best.fitness)
+                        )
                     if debug:
-                        print('\nparent1.dna', parent1.dna)
-                        print('\nparent2.dna', parent2.dna)
-                        print('\nchild.dna.mutation', child.dna)
-                        
-                        
+                        print("\nparent1.dna", parent1.dna)
+                        print("\nparent2.dna", parent2.dna)
+                        print("\nchild.dna.mutation", child.dna)
+
                 aux_T_dna = [len(subject.dna) for subject in self.population]
-                self.trace.append({
-                    'medium_fitness': sum(self.fitnesses)/self.population_size,
-                    'best_fitness': self.best.fitness,
-                    'newborns': self.flag_newborn,
-                    'newbest': self.flag_newbest,
-                    'T_medio': sum(aux_T_dna)/self.population_size,
-                    'T_maior': max(aux_T_dna),
-                    'T_menor': min(aux_T_dna),
-                    'T_melhor': len(self.best.dna)
-                })
-                
+                self.trace.append(
+                    {
+                        "medium_fitness": sum(self.fitnesses) / self.population_size,
+                        "best_fitness": self.best.fitness,
+                        "newborns": self.flag_newborn,
+                        "newbest": self.flag_newbest,
+                        "T_medio": sum(aux_T_dna) / self.population_size,
+                        "T_maior": max(aux_T_dna),
+                        "T_menor": min(aux_T_dna),
+                        "T_melhor": len(self.best.dna),
+                    }
+                )
+
                 # Print
                 if verbose:
-                    print('Fim da geração. {} novos indivíduos'.format(self.flag_newborn))
-                    print('Melhor de todos: {}'.format(self.best.fitness))
-                    print('-'*20)
-                        
-                        
+                    print(
+                        "Fim da geração. {} novos indivíduos".format(self.flag_newborn)
+                    )
+                    print("Melhor de todos: {}".format(self.best.fitness))
+                    print("-" * 20)
+
             # Reiniciar rotas
             self.population = []
-            self.population = self._genesis(self.Specie, self.population_size-1)
+            self.population = self._genesis(self.Specie, self.population_size - 1)
             # Nunca matar o melhor de todos
             self.population.append(self.best)
-            
+
             # Inicializar
             self._decode(self.population)
-            
+
             # Avaliar
-            self.fitnesses = [self._fitness(subject, self.map) for subject in self.population]
-            
+            self.fitnesses = [
+                self._fitness(subject, self.map) for subject in self.population
+            ]
+
             # Print
             if verbose:
-                print('Meteoro! Reiniciando rotas')
+                print("Meteoro! Reiniciando rotas")
             if info:
-                print('Meteoro! Melhor de todos:{} - count:{}'.format(self.best.fitness, count_while))
-                
-                
+                print(
+                    "Meteoro! Melhor de todos:{} - count:{}".format(
+                        self.best.fitness, count_while
+                    )
+                )
+
         return self.best
-                      
+
     # ---
-    
+
     def _insert(self, child, parent1, parent2):
         # Verifica se um indivíduo é digno de entrar na população e tomar o lugar de um de seus pais
 
         self.flag_newbest = False
-        
+
         if child.fitness < parent1.fitness:
             self.__substitute(child, parent1)
 
@@ -495,8 +504,7 @@ class Genetic():
             self.best = child
             self.ancestry.append(child)
             self.flag_newbest = True
-    
-    
+
     def __substitute(self, child, parent):
         i_parent = self.population.index(parent)
 
@@ -506,95 +514,97 @@ class Genetic():
         self.fitnesses.pop(i_parent)
         self.fitnesses.append(child.fitness)
         self.flag_newborn += 1
-    
-    
+
     # ---
-    
+
     def stop_criteria(self):
         # Para a execução depois de uma quantidade de segundos
         if (time.time() - self.start_time) >= self.max_exec_time:
             return True
         return False
-    
+
     def converge(self):
         # Converge caso nenhum novo indivíduo seja adicinado
         if self.flag_newborn == 0:
             return True
         return False
-                         
+
     # ---
-    
+
     def _genesis(self, Specie, population_size):
-        population = [Specie(start_time=self.start_time, version=self.version,**self.kwargs) for i in range(population_size)]
-        return population 
-    
+        population = [
+            Specie(start_time=self.start_time, version=self.version, **self.kwargs)
+            for i in range(population_size)
+        ]
+        return population
+
     # ---
-    
+
     def _decode(self, population):
         for subject in population:
             subject.decode()
         return True
-    
+
     # ---
-    
+
     def _fitness(self, subject, map):
-        
-        fit_d   = self.__fitness_destination(subject, map)
+
+        fit_d = self.__fitness_destination(subject, map)
         fit_obs = self.__fitness_obstacles(subject, map)
         fit_con = self.__fitness_consumption(subject, map)
         fit_cur = self.__fitness_curves(subject, map)
-        fit_t   = self.__fitness_t(subject, map)
-        
-        fitness_trace = [self.C_d   * fit_d,
-                         self.C_obs * fit_obs,
-                         self.C_con * fit_con,
-                         self.C_cur * fit_cur,
-                         self.C_t   * fit_t]
-        
+        fit_t = self.__fitness_t(subject, map)
+
+        fitness_trace = [
+            self.C_d * fit_d,
+            self.C_obs * fit_obs,
+            self.C_con * fit_con,
+            self.C_cur * fit_cur,
+            self.C_t * fit_t,
+        ]
+
         fitness = sum(fitness_trace)
-        
+
         birth_time = time.time() - self.start_time
-        
+
         subject.set_fitness(fitness, fitness_trace, birth_time)
-        
+
         return fitness
-    
+
     def __fitness_destination(self, subject, map):
         # Prioriza rotas que acertem o destino
-        
-        A = subject.dna_decoded[-1] # Último waypoint da rota
-        B = map.destination        # Waypoint de destino
-        
+
+        A = subject.dna_decoded[-1]  # Último waypoint da rota
+        B = map.destination  # Waypoint de destino
+
         # Distância euclidiana entre o último ponto da rota e o ponto de destino
-        d = sqrt( (B.x - A.x)**2 + (B.y - A.y)**2 )
-        
+        d = sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2)
+
         # Determina uma precisão mínima aceita
-        if d < self.min_precision: # min_precision default = 1.0
+        if d < self.min_precision:  # min_precision default = 1.0
             return 0
         return d
 
-    
     def __fitness_obstacles(self, subject, map):
         # def __fitness_obstacles is an abstraction of either one of those two following functions
         # __fitness_obstacles_RC and __fitness_obstacles_CC
-        
+
         if self.version.minor == "RC":
             return self.__fitness_obstacles_RC(subject, map)
-        
+
         elif self.version.minor == "CC":
             return self.__fitness_obstacles_CC(subject, map)
-    
 
     def __fitness_obstacles_RC(self, subject, map):
         # Prioriza rotas que não ultrapassem obstáculos
         count = 0
-        
-        for gene_decoded_t1, gene_decoded_t2  in pairwise(subject.dna_decoded):
+
+        for gene_decoded_t1, gene_decoded_t2 in pairwise(subject.dna_decoded):
             # Utiliza somente as áreas infladas para cálculo
             for area_n in map.areas_n_inf:
                 wp1 = CartesianPoint(gene_decoded_t1.x, gene_decoded_t1.y)
                 wp2 = CartesianPoint(gene_decoded_t2.x, gene_decoded_t2.y)
-                
+
                 # Calcula se algum waypoint está dentro de algum obstáculo
                 if point_in_polygon(wp1, area_n):
                     count += 1
@@ -602,14 +612,13 @@ class Genetic():
                 # Calcula se alguma conexão entre os waypoints intersecciona algum obstáculo
                 if segment_in_polygon(wp1, wp2, area_n):
                     count += 1
-            
-        return count
 
+        return count
 
     def __fitness_obstacles_CC(self, subject, map):
         uncertainty = self.gps_imprecision
-    
-        #if debug:
+
+        # if debug:
         #    print('(   x   ,   y   ) distance | risk(%)')
 
         risks_points = []
@@ -621,54 +630,43 @@ class Genetic():
                 distance = _distance_wp_area(wp, area)
                 risk = _prob_collision(distance, uncertainty)
 
-                #if debug: 
+                # if debug:
                 #    print('({0:^.1f},{1:^.1f}) {2:8.3f} | {3:}'.format(wp.x, wp.y, distance, round(risk,4)))
 
                 risks_areas.append(risk)
             risks_points.append(sum(risks_areas))
 
-        #print(risks_points)
+        # print(risks_points)
         return sum(risks_points)
-    
-    
+
     def __fitness_consumption(self, subject, _):
         # Prioriza rotas com menor consumo de combustível (bateria)
-        consumption = [gene.a**2 for gene in subject.dna]
+        consumption = [gene.a ** 2 for gene in subject.dna]
         return sum(consumption)
-    
-        
+
     def __fitness_curves(self, subject, _):
         # Prioriza rotas que evitem fazer curvas desnecessárias
         curves = [abs(gene.e) for gene in subject.dna]
-        return (1/subject.e_max) * sum(curves)
-        
-        
+        return (1 / subject.e_max) * sum(curves)
+
     def __fitness_t(self, subject, _):
         # Prioriza rotas com menor quantidade de waypoints
         return len(subject.dna)
-    
-        
+
     # ---
-        
+
     def _tournament(self, population, k=2):
         parents = []
         for _ in range(2):
-            
+
             local_best = random.choice(population)
-            for _ in range(k-1):
+            for _ in range(k - 1):
                 # Seleciona k individuos
                 a = random.choice(population)
                 if a.fitness < local_best.fitness:
                     local_best = a
-                    
+
             parents.append(local_best)
-            
+
         # Retorna o resultado de duas batalhas
         return parents[0], parents[1]
-        
-        
-
-        
-        
-        
-        

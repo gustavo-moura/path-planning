@@ -1,10 +1,16 @@
 import collections
 import math
 
-CartesianPoint = collections.namedtuple("CartesianPoint", "x y")
 GeoPoint = collections.namedtuple("GeoPoint", "latitude, longitude, altitude")
 Vector = collections.namedtuple("Vector", "x y")
 Version = collections.namedtuple("Version", "major, minor")
+
+
+class CartesianPoint:
+    def __init__(self, x, y, z=0):
+        self.x = x
+        self.y = y
+        self.z = z
 
 
 class Map:

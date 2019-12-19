@@ -1,5 +1,5 @@
 import pandas as pd
-
+import itertools
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.path import Path
@@ -167,8 +167,10 @@ def plot_map(wp_style="-x", **kwargs):
     if "title" in kwargs:
         plt.title(kwargs["title"])
 
-    plt.show()
-    # plt.savefig('out.png')
+    #plt.show()
+
+    if 'save' in kwargs:
+        plt.savefig(kwargs['save'])
 
 
 def plot_stats(ag_trace, normalize=True):
@@ -192,3 +194,23 @@ def _graph_sub(A, B):
     maior = max(A, B)
 
     return menor + ((maior - menor) / 2)
+
+
+def vis_mapa(mapa, route=None, **qwargs):
+    areas = [ area for area in itertools.chain(mapa.areas_n, mapa.areas_n_inf) ]
+    tipos = [ 'n' for _ in range(len(areas))]
+
+    kwargs={
+        'areas': areas,
+        'labels': tipos,
+        'origem': mapa.origin,
+        'destino': mapa.destination,
+    }
+
+    if route:
+        kwargs['waypoints']=route
+
+    kwargs.update(qwargs)
+
+    plot_map(**kwargs)
+

@@ -2,7 +2,7 @@ import itertools
 import math
 from scipy.stats import norm
 
-from data_definitions import Vector
+from genetic.data_definitions import Vector
 
 # Support Functions
 # _________________________________________________________________________________________________
