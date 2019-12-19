@@ -7,7 +7,7 @@ from math import cos, sin, sqrt, ceil
 
 from itertools import tee
 from utils import pairwise, point_in_polygon, segment_in_polygon, _distance_wp_area, _prob_collision, boundary
-from data_definitions import CartesianPoint
+from data_definitions import CartesianPoint, Version
 
 Gene = collections.namedtuple('Gene', 'a e')
 GeneDecoded = collections.namedtuple('GeneDecoded', 'x y v al')
@@ -413,7 +413,7 @@ class Genetic():
                 self.flag_newborn = 0
                 count_while += 1
                 
-                for i in range(ceil(self.taxa_cross * self.population_size)):
+                for _ in range(ceil(self.taxa_cross * self.population_size)):
                     # Seleção por torneio
                     parent1, parent2 = self._tournament(self.population, k=self.k_tournament)
             
@@ -652,10 +652,10 @@ class Genetic():
         
     def _tournament(self, population, k=2):
         parents = []
-        for i in range(2):
+        for _ in range(2):
             
             local_best = random.choice(population)
-            for j in range(k-1):
+            for _ in range(k-1):
                 # Seleciona k individuos
                 a = random.choice(population)
                 if a.fitness < local_best.fitness:
