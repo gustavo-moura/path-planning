@@ -1,4 +1,5 @@
 import pandas as pd
+# import numpy as np
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -16,11 +17,17 @@ cor_waypoints = "#aa1155"  # Jazzberry Jam
 cor_ori_dest = "#880044"  # Pink Raspberry
 
 
-def new_shape(vertices, color="navajowhite", lw=0.25):
+def new_shape(vert, color="navajowhite", lw=0.25):
 
-    assert len(vertices) >= 3, "At least 3 vertices to form a shape"
+    # print(vert)
+    assert len(vert) >= 3, "At least 3 vertices to form a shape"
 
-    vertices.append(vertices[0])  # corrects the final movement point
+    vert.append(vert[0])
+
+    vertices = []
+
+    for vertex in vert:
+        vertices.append((vertex.x, vertex.y))
 
     colors = {"n": cor_area_nn, "p": cor_area_p, "b": cor_area_b}
 
@@ -42,14 +49,19 @@ def plot_map(wp_style="-x", **kwargs):
     # Optional arguments:
     # areas, labels, origem, destino, waypoints, texts
 
-    _, ax = plt.subplots(figsize=(8, 8))
+    if "figsize" in kwargs:
+        figsize = kwargs["figsize"]
+    else:
+        figsize = (8, 8)
+
+    fig, ax = plt.subplots(figsize=figsize)
 
     # Plot areas
     if "areas" in kwargs and "labels" in kwargs:
         areas = kwargs["areas"]
         labels = kwargs["labels"]
         patches = [
-            new_shape(vertices, color=label) for vertices, label in zip(areas, labels)
+            new_shape(vertice, color=label) for vertice, label in zip(areas, labels)
         ]
         for patch in patches:
             ax.add_patch(patch)
@@ -58,16 +70,15 @@ def plot_map(wp_style="-x", **kwargs):
     if "origem" in kwargs and "destino" in kwargs:
         origem = kwargs["origem"]
         destino = kwargs["destino"]
-        ax.plot(
-            [origem[0], destino[0]], [origem[1], destino[1]], "o", color=cor_ori_dest
-        )
+        ax.plot([origem.x, destino.x], [origem.y, destino.y], "o", color=cor_ori_dest)
 
     # Plot a route with its waypoints
     if "waypoints" in kwargs:
         waypoints = kwargs["waypoints"]
         waypoints = list(map(list, zip(*waypoints)))
-        # marker='x', linestyle='solid'
-        ax.plot(waypoints[0], waypoints[1], wp_style, color=cor_waypoints, linewidth=2)
+        ax.plot(
+            waypoints[0], waypoints[1], wp_style, color=cor_waypoints, linewidth=2
+        )  # marker='x', linestyle='solid'
         if "texts" in kwargs:
             for i, text in enumerate(kwargs["texts"]):
                 ax.annotate(text, (waypoints[0][i], waypoints[1][i]))
@@ -167,10 +178,14 @@ def plot_map(wp_style="-x", **kwargs):
     if "title" in kwargs:
         plt.title(kwargs["title"])
 
-    #plt.show()
+    # plt.show()
+    # plt.savefig('out.png')
 
-    if 'save' in kwargs:
-        plt.savefig(kwargs['save'])
+    if "save" in kwargs:
+        plt.savefig(kwargs["save"])
+
+    if "show" in kwargs:
+        plt.show()
 
 
 def plot_stats(ag_trace, normalize=True):
@@ -197,20 +212,19 @@ def _graph_sub(A, B):
 
 
 def vis_mapa(mapa, route=None, **qwargs):
-    areas = [ area for area in itertools.chain(mapa.areas_n, mapa.areas_n_inf) ]
-    tipos = [ 'n' for _ in range(len(areas))]
+    areas = [area for area in itertools.chain(mapa.areas_n, mapa.areas_n_inf)]
+    tipos = ["n" for _ in range(len(areas))]
 
-    kwargs={
-        'areas': areas,
-        'labels': tipos,
-        'origem': mapa.origin,
-        'destino': mapa.destination,
+    kwargs = {
+        "areas": areas,
+        "labels": tipos,
+        "origem": mapa.origin,
+        "destino": mapa.destination,
     }
 
     if route:
-        kwargs['waypoints']=route
+        kwargs["waypoints"] = route
 
     kwargs.update(qwargs)
 
     plot_map(**kwargs)
-
