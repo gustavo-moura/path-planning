@@ -7,13 +7,10 @@ from math import cos, sin, sqrt, ceil
 
 # from itertools import tee
 
-from genetic.utils import (
-    pairwise,
-    point_in_polygon,
-    segment_in_polygon,
-    _distance_wp_area,
-    _prob_collision,
-)
+from genetic.utils import pairwise, point_in_polygon, segment_in_polygon
+
+# from genetic.utils import _distance_wp_area, _prob_collision
+
 from genetic.data_definitions import Version, CartesianPoint
 
 Gene = collections.namedtuple("Gene", "a e")
@@ -73,8 +70,6 @@ class Subject:
         self.a_min = a_min  # float : Aceleração mínima (m/s**2)
         self.a_max = a_max  # float : Aceleração máxima (m/s**2)
 
-        # TODO9:implementar os initialize
-
         # Modelo
         self.T_min = T_min  # int : Valor mínimo para o horizonte de planejamento
         self.T_max = T_max  # int : Valor máximo para o horizonte de planejamento
@@ -92,20 +87,30 @@ class Subject:
         self.spawn_mode = spawn_mode  # str   : Tipo de incialização do DNA {'random'}
         self.start_time = start_time  # time  : a hora em que o genético começou a rodar
 
-        assert version, 'Algorithm version must be informed!\nEx: Version("alpha","RC")'
-        if version.major == "alpha":  # Sem otimização em T
-            self.T = T
-            self.mutation_choices = [self._mutation_creep, self._mutation_change]
-        elif version.major == "beta":  # Com otimização em T
-            self.T = random.randint(
-                T_min, T_max
-            )  # int : Horizonte de planejamento (quantidade de waypoints)
-            self.mutation_choices = [
-                self._mutation_remove,
-                self._mutation_insert,
-                self._mutation_creep,
-                self._mutation_change,
-            ]
+        # assert version, 'Algorithm version must be informed!\nEx: Version("alpha","RC")'
+        # if version.major == "alpha":  # Sem otimização em T
+        #     self.T = T
+        #     self.mutation_choices = [self._mutation_creep, self._mutation_change]
+        # elif version.major == "beta":  # Com otimização em T
+        #     self.T = random.randint(
+        #         T_min, T_max
+        #     )  # int : Horizonte de planejamento (quantidade de waypoints)
+        #     self.mutation_choices = [
+        #         self._mutation_remove,
+        #         self._mutation_insert,
+        #         self._mutation_creep,
+        #         self._mutation_change,
+        #     ]
+
+        self.T = random.randint(
+            T_min, T_max
+        )  # int : Horizonte de planejamento (quantidade de waypoints)
+        self.mutation_choices = [
+            self._mutation_remove,
+            self._mutation_insert,
+            self._mutation_creep,
+            self._mutation_change,
+        ]
 
         self.spawn(mode=spawn_mode)
 
@@ -121,10 +126,9 @@ class Subject:
 
     # ---
 
-    def set_fitness(self, fitness, fitness_trace, birth_time):
+    def set_fitness(self, fitness, fitness_trace):
         self.fitness = fitness
         self.fitness_trace = fitness_trace
-        # self.birth_time = birth_time
 
     # ---
 
@@ -433,7 +437,7 @@ class Genetic:
         # Escolher melhor de todos
         self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
 
-        self.trace = []
+        # self.trace = []
 
         while not self.stop_criteria():
             self.flag_newborn = self.population_size
@@ -461,37 +465,37 @@ class Genetic:
                     # Adicionar filho na população
                     self._insert(child, parent1, parent2)
 
-                    # Print
-                    if verbose and self.flag_newbest:
-                        print(
-                            "  Novo melhor de todos! fit: {}".format(self.best.fitness)
-                        )
-                    if debug:
-                        print("\nparent1.dna", parent1.dna)
-                        print("\nparent2.dna", parent2.dna)
-                        print("\nchild.dna.mutation", child.dna)
+                    # # Print
+                    # if verbose and self.flag_newbest:
+                    #     print(
+                    #         "  Novo melhor de todos! fit: {}".format(self.best.fitness)
+                    #     )
+                    # if debug:
+                    #     print("\nparent1.dna", parent1.dna)
+                    #     print("\nparent2.dna", parent2.dna)
+                    #     print("\nchild.dna.mutation", child.dna)
 
-                aux_T_dna = [len(subject.dna) for subject in self.population]
-                self.trace.append(
-                    {
-                        "medium_fitness": sum(self.fitnesses) / self.population_size,
-                        "best_fitness": self.best.fitness,
-                        "newborns": self.flag_newborn,
-                        "newbest": self.flag_newbest,
-                        "T_medio": sum(aux_T_dna) / self.population_size,
-                        "T_maior": max(aux_T_dna),
-                        "T_menor": min(aux_T_dna),
-                        "T_melhor": len(self.best.dna),
-                    }
-                )
+                # aux_T_dna = [len(subject.dna) for subject in self.population]
+                # self.trace.append(
+                #     {
+                #         "medium_fitness": sum(self.fitnesses) / self.population_size,
+                #         "best_fitness": self.best.fitness,
+                #         "newborns": self.flag_newborn,
+                #         "newbest": self.flag_newbest,
+                #         "T_medio": sum(aux_T_dna) / self.population_size,
+                #         "T_maior": max(aux_T_dna),
+                #         "T_menor": min(aux_T_dna),
+                #         "T_melhor": len(self.best.dna),
+                #     }
+                # )
 
                 # Print
-                if verbose:
-                    print(
-                        "Fim da geração. {} novos indivíduos".format(self.flag_newborn)
-                    )
-                    print("Melhor de todos: {}".format(self.best.fitness))
-                    print("-" * 20)
+                # if verbose:
+                #     print(
+                #         "Fim da geração. {} novos indivíduos".format(self.flag_newborn)
+                #     )
+                #     print("Melhor de todos: {}".format(self.best.fitness))
+                #     print("-" * 20)
 
             # Reiniciar rotas
             self.population = []
@@ -508,14 +512,14 @@ class Genetic:
             ]
 
             # Print
-            if verbose:
-                print("Meteoro! Reiniciando rotas")
-            if info:
-                print(
-                    "Meteoro! Melhor de todos:{} - count:{}".format(
-                        self.best.fitness, count_while
-                    )
-                )
+            # if verbose:
+            #     print("Meteoro! Reiniciando rotas")
+            # if info:
+            #     print(
+            #         "Meteoro! Melhor de todos:{} - count:{}".format(
+            #             self.best.fitness, count_while
+            #         )
+            #     )
 
         return self.best
 
@@ -599,9 +603,7 @@ class Genetic:
 
         fitness = sum(fitness_trace)
 
-        birth_time = time.time() - self.start_time
-
-        subject.set_fitness(fitness, fitness_trace, birth_time)
+        subject.set_fitness(fitness, fitness_trace)
 
         return fitness
 
@@ -619,17 +621,18 @@ class Genetic:
             return 0
         return d
 
+    # def __fitness_obstacles(self, subject, mapa):
+    #     # def __fitness_obstacles is an abstraction of either one of those two following functions
+    #     # __fitness_obstacles_RC and __fitness_obstacles_CC
+
+    #     if self.version.minor == "RC":
+    #         return self.__fitness_obstacles_RC(subject, mapa)
+
+    #     elif self.version.minor == "CC":
+    #         return self.__fitness_obstacles_CC(subject, mapa)
+
+    # def __fitness_obstacles_RC(self, subject, mapa):
     def __fitness_obstacles(self, subject, mapa):
-        # def __fitness_obstacles is an abstraction of either one of those two following functions
-        # __fitness_obstacles_RC and __fitness_obstacles_CC
-
-        if self.version.minor == "RC":
-            return self.__fitness_obstacles_RC(subject, mapa)
-
-        elif self.version.minor == "CC":
-            return self.__fitness_obstacles_CC(subject, mapa)
-
-    def __fitness_obstacles_RC(self, subject, mapa):
         # Prioriza rotas que não ultrapassem obstáculos
         count = 0
 
@@ -649,29 +652,29 @@ class Genetic:
 
         return count
 
-    def __fitness_obstacles_CC(self, subject, mapa):
-        uncertainty = self.gps_imprecision
+    # def __fitness_obstacles_CC(self, subject, mapa):
+    #     uncertainty = self.gps_imprecision
 
-        # if debug:
-        #    print('(   x   ,   y   ) distance | risk(%)')
+    #     # if debug:
+    #     #    print('(   x   ,   y   ) distance | risk(%)')
 
-        risks_points = []
-        for gene_decoded in subject.dna_decoded:
-            risks_areas = []
-            for area in mapa.areas_n_inf:
-                wp = CartesianPoint(gene_decoded.x, gene_decoded.y)
+    #     risks_points = []
+    #     for gene_decoded in subject.dna_decoded:
+    #         risks_areas = []
+    #         for area in mapa.areas_n_inf:
+    #             wp = CartesianPoint(gene_decoded.x, gene_decoded.y)
 
-                distance = _distance_wp_area(wp, area)
-                risk = _prob_collision(distance, uncertainty)
+    #             distance = _distance_wp_area(wp, area)
+    #             risk = _prob_collision(distance, uncertainty)
 
-                # if debug:
-                #    print('({0:^.1f},{1:^.1f}) {2:8.3f} | {3:}'.format(wp.x, wp.y, distance, round(risk,4)))
+    #             # if debug:
+    #             #    print('({0:^.1f},{1:^.1f}) {2:8.3f} | {3:}'.format(wp.x, wp.y, distance, round(risk,4)))
 
-                risks_areas.append(risk)
-            risks_points.append(sum(risks_areas))
+    #             risks_areas.append(risk)
+    #         risks_points.append(sum(risks_areas))
 
-        # print(risks_points)
-        return sum(risks_points)
+    #     # print(risks_points)
+    #     return sum(risks_points)
 
     def __fitness_consumption(self, subject, _):
         # Prioriza rotas com menor consumo de combustível (bateria)

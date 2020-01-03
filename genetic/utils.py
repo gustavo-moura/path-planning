@@ -69,8 +69,8 @@ def ray_intersects_segment(P, A, B):
     #     (B must be "above" A)
 
     # To avoid the "ray on vertex" problem, the point is moved upward of a small quantity epsilon.
-    if P.y == A.y or P.y == B.y:
-        P.y += epsilon
+    # if P.y == A.y or P.y == B.y:
+    P.y += epsilon
 
     # Point higher or lower than polygon
     if P.y < A.y or P.y > B.y:
@@ -112,21 +112,10 @@ def segment_in_polygon(wp1, wp2, polygon):
     for vertex1, vertex2 in pairwise_circle(polygon):
         A = vertex1
         B = vertex2
-        # if vertex1.y < vertex2.y:
-        #    A = vertex1
-        #    B = vertex2
-        # else:
-        #    A = vertex2
-        #    B = vertex1
-        # print('Polygon edge: {}-{}'.format(A, B))
 
         if segment_intersects_segment(wp1, wp2, A, B):
             return True
     return False
-    # if count > 1:
-    #     return True
-    # else:
-    #     return False
 
 
 def segment_intersects_segment(p1, q1, p2, q2):

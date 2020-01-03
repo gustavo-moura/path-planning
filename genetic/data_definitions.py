@@ -19,15 +19,7 @@ class CartesianPoint:
 
 
 class Mapa:
-    def __init__(
-        self,
-        origin,
-        destination,
-        areas_n,
-        inflation_rate=0.1,
-        mode="scalar",
-        verbose=False,
-    ):
+    def __init__(self, origin, destination, areas_n, inflation_rate=0.1):
         self.origin = origin  # CartesianPoint : Define o ponto de partida da rota
         self.destination = (
             destination  # CartesianPoint : Define o ponto de destino da rota
@@ -35,81 +27,39 @@ class Mapa:
         self.areas_n = areas_n  # [area, ...]
         # area = [CartesianPoint(),...]
         self.areas_n_inf = [
-            self._inflate_area(
-                area, inflation_rate=inflation_rate, mode=mode, verbose=verbose
-            )
-            for area in areas_n
+            self._inflate_area(area, inflation_rate=inflation_rate) for area in areas_n
         ]
 
-    def _inflate_area(self, area, inflation_rate, mode, verbose):
-        if mode == "percentage":
-            # TODO: remove
-            # Infla uma área retangular em uma porcentagem do tamanho, alterando os valores em x% de cada vértice
-            x = area[2].x - area[0].x
-            y = area[1].y - area[3].y
+    def _inflate_area(self, area, inflation_rate):
 
-            inc = inflation_rate
-            dec = -(inflation_rate)
+        lines = []
 
-            new_area = [
-                CartesianPoint(
-                    area[0].x + dec * x, area[0].y + dec * y
-                ),  # left,  bottom
-                CartesianPoint(area[1].x + dec * x, area[1].y + inc * y),  # left,  top
-                CartesianPoint(area[2].x + inc * x, area[2].y + inc * y),  # right, top
-                CartesianPoint(
-                    area[3].x + inc * x, area[3].y + dec * y
-                ),  # right, bottom
-            ]
-            # new_area.append(new_area[0]) # Repetir primeiro ponto, para o ignore do shape na hora de plotar
+        for V1, V2 in pairwise_circle(area):
+            N = _normal(V1, V2)
 
-        elif mode == "scalar":
-            # TODO: possibly remove
-            # Infla uma área retangular em uma quantidade fixa
-            inc = inflation_rate
-            dec = -(inflation_rate)
+            NV1 = CartesianPoint(
+                V1.x + N.x * inflation_rate, V1.y + N.y * inflation_rate
+            )
+            NV2 = CartesianPoint(
+                V2.x + N.x * inflation_rate, V2.y + N.y * inflation_rate
+            )
 
-            new_area = [
-                CartesianPoint(area[0].x + dec, area[0].y + dec),  # left,  bottom
-                CartesianPoint(area[1].x + dec, area[1].y + inc),  # left,  top
-                CartesianPoint(area[2].x + inc, area[2].y + inc),  # right, top
-                CartesianPoint(area[3].x + inc, area[3].y + dec),  # right, bottom
-            ]
-            # new_area.append(new_area[0]) # Repetir primeiro ponto, para o ignore do shape na hora de plotar
+            a, b, c = _eq_line(NV1, NV2)
+            lines.append((a, b, c))
 
-        elif mode == "vector":
+            # if verbose:
+            #     print(f"V1:{NV1} V2:{NV2}  ->  L:({a}x + {b}y + {c} = 0)")
 
-            lines = []
+        new_area = []
 
-            for V1, V2 in pairwise_circle(area):
-                N = _normal(V1, V2)
+        for L1, L2 in pairwise_circle(lines):
+            x, y = _eq_intersection_point(L1[0], L1[1], L1[2], L2[0], L2[1], L2[2])
+            new_area.append(CartesianPoint(x, y))
 
-                NV1 = CartesianPoint(
-                    V1.x + N.x * inflation_rate, V1.y + N.y * inflation_rate
-                )
-                NV2 = CartesianPoint(
-                    V2.x + N.x * inflation_rate, V2.y + N.y * inflation_rate
-                )
-
-                a, b, c = _eq_line(NV1, NV2)
-                lines.append((a, b, c))
-
-                if verbose:
-                    print(f"V1:{NV1} V2:{NV2}  ->  L:({a}x + {b}y + {c} = 0)")
-
-            new_area = []
-
-            for L1, L2 in pairwise_circle(lines):
-                x, y = _eq_intersection_point(L1[0], L1[1], L1[2], L2[0], L2[1], L2[2])
-                new_area.append(CartesianPoint(x, y))
-
-                if verbose:
-                    print(
-                        f"L1:({L1[0]}x + {L1[1]}y + {L1[2]} = 0) L2:({L2[0]}x + {L2[1]}y + {L2[2]} = 0)  ->  V=({x},{y})"
-                    )
-
-        else:
-            raise Exception("Unrecognized tipe")
+            # if verbose:
+            #     print(
+            #         f"L1:({L1[0]}x + {L1[1]}y + {L1[2]} = 0) L2:({L2[0]}x + {L2[1]}y + {L2[2]} = 0)  ->  V=({x},{y})"
+            #     )
 
         return new_area
 
