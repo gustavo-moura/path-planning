@@ -11,27 +11,13 @@ from genetic.utils import pairwise, point_in_polygon, segment_in_polygon
 
 # from genetic.utils import _distance_wp_area, _prob_collision
 
-from genetic.data_definitions import Version, CartesianPoint
+from genetic.data_definitions import CartesianPoint  # , Version
 
 Gene = collections.namedtuple("Gene", "a e")
 GeneDecoded = collections.namedtuple("GeneDecoded", "x y v al")
 
 
 class Subject:
-
-    # codificação - u
-    # dna = [Gene, ...]
-    #     Gene = [a, e]
-    #         a = float: aceleração
-    #         e = float: variação angular
-
-    # decodificação - x
-    # dna_decoded = [GeneDecoded, ...]
-    #     GeneDecoded = (x, y, v, al)
-    #         x  = : Posição do VANT no eixo x (aka px)
-    #         y  = : Posição do VANT no eixo y (aka py)
-    #         v  = : Velocidade do VANT na horizontal
-    #         al = : ângulo (direção) do VANT na horizontal
     def __init__(
         self,
         px0=10.0,
@@ -51,10 +37,24 @@ class Subject:
         m=743.0,
         mutation_prob=0.7,
         start_time=None,
-        spawn_mode="random",
-        version=None,
+        generation=None,
+        id=-1,
         **kwargs
     ):
+        # codificação - u
+        # dna = [Gene, ...]
+        #     Gene = [a, e]
+        #         a = float: aceleração
+        #         e = float: variação angular
+
+        # decodificação - x
+        # dna_decoded = [GeneDecoded, ...]
+        #     GeneDecoded = (x, y, v, al)
+        #         x  = : Posição do VANT no eixo x (aka px)
+        #         y  = : Posição do VANT no eixo y (aka py)
+        #         v  = : Velocidade do VANT na horizontal
+        #         al = : ângulo (direção) do VANT na horizontal
+
         # VANT
         # px0   int : Posição inicial no eixo x (m)
         # py0   int : Posição inicial no eixo y (m)
@@ -84,8 +84,12 @@ class Subject:
         # self.birth_time    = None          # time  : Hora que o indivíduo é criado
         self.dna = None  # list  : Conjunto de genes formando o DNA ([Gene, ...])
         self.dna_decoded = None  # list  : DNA decodificado ([GeneDecoded, ...])
-        self.spawn_mode = spawn_mode  # str   : Tipo de incialização do DNA {'random'}
+        # spawn_mode="random",
+        # self.spawn_mode = spawn_mode  # str   : Tipo de incialização do DNA {'random'}
         self.start_time = start_time  # time  : a hora em que o genético começou a rodar
+        self.generation = generation
+        self.id = id
+        self.parents = []
 
         # assert version, 'Algorithm version must be informed!\nEx: Version("alpha","RC")'
         # if version.major == "alpha":  # Sem otimização em T
@@ -105,19 +109,26 @@ class Subject:
         self.T = random.randint(
             T_min, T_max
         )  # int : Horizonte de planejamento (quantidade de waypoints)
-        self.mutation_choices = [
-            self._mutation_remove,
-            self._mutation_insert,
-            self._mutation_creep,
-            self._mutation_change,
-        ]
+        # self.mutation_choices = [
+        #     self._mutation_remove,
+        #     self._mutation_insert,
+        #     self._mutation_creep,
+        #     self._mutation_change,
+        # ]
 
-        self.spawn(mode=spawn_mode)
+        # self.spawn(mode=spawn_mode)
+        self.spawn()
+
+    def __repr__(self):
+        return f'({self.id}, {self.parents})'
 
     # ---
 
     def to_dict(self):
         return {
+            "id": self.id,
+            "generation": self.generation,
+            "parents": self.parents,
             "fitness": self.fitness,
             "fitness_trace": self.fitness_trace,
             "birth_time": self.birth_time,
@@ -130,16 +141,32 @@ class Subject:
         self.fitness = fitness
         self.fitness_trace = fitness_trace
 
+    def set_generation(self, generation):
+        self.generation = generation
+
+    def set_id(self, id):
+        self.id = id
+
+    def set_parents(self, parent1, parent2):
+        self.parents.append(parent1.id)
+        self.parents.append(parent2.id)
+
     # ---
 
-    def spawn(self, mode):
-        self.dna = [self._build_gene(mode) for _ in range(self.T)]
+    def spawn(self):
+        # def spawn(self, mode):
+        #     self.dna = [self._build_gene(mode) for _ in range(self.T)]
+        self.dna = [self._build_gene() for _ in range(self.T)]
 
-    def _build_gene(self, mode="random"):
+    def _build_gene(self):
+        # def _build_gene(self, mode="random"):
+        #     # Inicialização aleatória gera valores com distribuição uniforme
+        #     if mode == "random":
+        #         a = random.uniform(self.a_min, self.a_max)
+        #         e = random.uniform(self.e_min, self.e_max)
         # Inicialização aleatória gera valores com distribuição uniforme
-        if mode == "random":
-            a = random.uniform(self.a_min, self.a_max)
-            e = random.uniform(self.e_min, self.e_max)
+        a = random.uniform(self.a_min, self.a_max)
+        e = random.uniform(self.e_min, self.e_max)
 
         return Gene(a, e)
 
@@ -157,7 +184,7 @@ class Subject:
 
         # parametros
         delta_T = self.delta_T
-        m = self.m
+        # m = self.m
 
         dna_decoded = []
         dna_decoded.append(self.gene_decoded_0)
@@ -173,12 +200,12 @@ class Subject:
             v = dna_decoded[i].v
             al = dna_decoded[i].al
 
-            F = self.__F(v)
+            # F = self.__F(v)
 
-            # Equações descritas em (Arantes 2016)
+            # Equações descritas em (Arantes 2016) - adaptações por Claudio (jan/20)
             _px = px + (v * cos(al) * delta_T) + (a * cos(al) * ((delta_T ** 2) / 2))
             _py = py + (v * sin(al) * delta_T) + (a * sin(al) * ((delta_T ** 2) / 2))
-            _v = v + (a * delta_T) - ((F / m) * delta_T)
+            _v = v + (a * delta_T)  # - ((F / m) * delta_T)
             _al = al + (e * delta_T)
 
             dna_decoded.append(GeneDecoded(_px, _py, _v, _al))
@@ -203,27 +230,11 @@ class Subject:
 
     # ---
 
-    def crossover(self, parent2):
+    def crossover(self, parent2, Specie, **kwargs):
         dna = random.choice([self._OX, self._BLX_Alpha])(self.dna, parent2.dna)
         dna = self._complete(dna, self.dna, parent2.dna)
-        child = self.generate(dna)
+        child = self.generate(dna, Specie, **kwargs)
         return child
-
-    def _complete(self, dna, dna1, dna2):
-        # Adiciona os genes restantes da diferença de tamanho entre os dois DNAs
-
-        if len(dna1) > len(dna2):
-            bigger = dna1
-            smaller = dna2
-        else:
-            bigger = dna2
-            smaller = dna1
-
-        for i in range(len(smaller) - 1, len(bigger) - 1):
-            if random.random() < 0.5:
-                dna.append(bigger[i])
-
-        return dna
 
     def _OX(self, dna1, dna2):
         dna = []
@@ -259,9 +270,29 @@ class Subject:
         u = random.uniform(min(x, y) - alpha * d, max(x, y) + alpha * d)
         return u
 
-    def generate(self, dna):
+    def _complete(self, dna, dna1, dna2):
+        # Adiciona os genes restantes da diferença de tamanho entre os dois DNAs
+
+        if len(dna1) > len(dna2):
+            bigger = dna1
+            smaller = dna2
+        else:
+            bigger = dna2
+            smaller = dna1
+
+        for i in range(len(smaller) - 1, len(bigger) - 1):
+            if random.random() < 0.5:
+                dna.append(bigger[i])
+
+        return dna
+
+    def generate(self, dna, Specie, **kwargs):
         # Cria um filho com os mesmos parametros do pai, mas com um dna fornecido
-        child = copy.deepcopy(self)
+        # child = copy.deepcopy(self)
+        child = Specie(
+            start_time=self.start_time,
+            **kwargs
+        )
         child.dna = dna
         child.decode()
         return child
@@ -276,13 +307,15 @@ class Subject:
         # Tem uma probabilidade mutation_prob de mutar o gene ou não
         if random.random() < mutation_prob:
             # Seleciona aleatoriamente uma das formas de mutação
-            new_dna = random.choice(self.mutation_choices)(self.dna)
-            # [
-            #     self._mutation_remove,
-            #     self._mutation_insert,
-            #     self._mutation_creep,
-            #     self._mutation_change
-            # ]
+            # new_dna = random.choice(self.mutation_choices)(self.dna)
+            new_dna = random.choice(
+                [
+                    self._mutation_remove,
+                    self._mutation_insert,
+                    self._mutation_creep,
+                    self._mutation_change,
+                ]
+            )(self.dna)
 
             if new_dna:
                 self.dna = new_dna
@@ -296,7 +329,8 @@ class Subject:
         new_dna = []
         for gene in dna:
             if random.random() < 0.5:
-                new_dna.append(self._build_gene("random"))
+                # new_dna.append(self._build_gene("random"))
+                new_dna.append(self._build_gene())
             else:
                 new_dna.append(gene)
 
@@ -365,12 +399,12 @@ class Genetic:
         C_con=500,
         C_cur=100,
         C_t=10,
+        C_dist=1,
         max_exec_time=1,
         min_precision=1.0,
         k_tournament=2,
         gps_imprecision=1,
         big_delta=1,
-        version=Version("beta", "RC"),
         **kwargs
     ):
         # Modelo
@@ -389,6 +423,7 @@ class Genetic:
         )
         self.C_cur = C_cur  # int   : Custo associado ao fitness de curvatura da rota
         self.C_t = C_t  # int   : Custo associado ao fitness do tamanho do DNA (T ou horizonte de planejamento)
+        self.C_dist = C_dist
         self.max_exec_time = (
             max_exec_time  # float : Tempo máximo de execução - Stop criteria (segundos)
         )
@@ -402,7 +437,8 @@ class Genetic:
         self.big_delta = big_delta
 
         # Versionamento
-        self.version = version
+        # version=Version("beta", "RC"),
+        # self.version = version
 
         # Alguns dos valores do kwargs são passados para a instanciação dos indivíduos
         self.kwargs = kwargs
@@ -411,14 +447,16 @@ class Genetic:
         self.population = None
         self.fitnesses = None
         self.best = None
-        self.ancestry = []
+        # self.ancestry = []
         self.history = []
+        self.current_id = 0
 
     def run(self, max_exec_time=None, verbose=False, info=False, debug=False):
         self.max_exec_time = max_exec_time if max_exec_time else self.max_exec_time
 
         # Acompanhamento do tempo (critério de parada)
         self.start_time = time.time()
+        self.generation = 0
 
         # Genesis
         self.population = self._genesis(self.Specie, self.population_size)
@@ -427,9 +465,7 @@ class Genetic:
         self._decode(self.population)
 
         # Avaliar
-        self.fitnesses = [
-            self._fitness(subject, self.mapa) for subject in self.population
-        ]
+        self.fitnesses = [self._fitness(subject, self.mapa) for subject in self.population]
 
         # Criar História
         self.history = [subject.to_dict() for subject in self.population]
@@ -437,24 +473,27 @@ class Genetic:
         # Escolher melhor de todos
         self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
 
+        # self.ancestry.append(self.best)
+
         # self.trace = []
 
         while not self.stop_criteria():
             self.flag_newborn = self.population_size
-            count_while = 0
 
             while not self.converge():
                 self.flag_newborn = 0
-                count_while += 1
+                self.generation += 1
 
-                for i in range(ceil(self.taxa_cross * self.population_size)):
+                for _ in range(ceil(self.taxa_cross * self.population_size)):
+
                     # Seleção por torneio
                     parent1, parent2 = self._tournament(
-                        self.population, k=self.k_tournament
+                        self.population,
+                        k=self.k_tournament
                     )
 
                     # Crossover
-                    child = parent1.crossover(parent2)
+                    child = parent1.crossover(parent2, self.Specie, **self.kwargs)
 
                     # Mutação
                     child.mutation()
@@ -465,61 +504,28 @@ class Genetic:
                     # Adicionar filho na população
                     self._insert(child, parent1, parent2)
 
-                    # # Print
-                    # if verbose and self.flag_newbest:
-                    #     print(
-                    #         "  Novo melhor de todos! fit: {}".format(self.best.fitness)
-                    #     )
-                    # if debug:
-                    #     print("\nparent1.dna", parent1.dna)
-                    #     print("\nparent2.dna", parent2.dna)
-                    #     print("\nchild.dna.mutation", child.dna)
-
-                # aux_T_dna = [len(subject.dna) for subject in self.population]
-                # self.trace.append(
-                #     {
-                #         "medium_fitness": sum(self.fitnesses) / self.population_size,
-                #         "best_fitness": self.best.fitness,
-                #         "newborns": self.flag_newborn,
-                #         "newbest": self.flag_newbest,
-                #         "T_medio": sum(aux_T_dna) / self.population_size,
-                #         "T_maior": max(aux_T_dna),
-                #         "T_menor": min(aux_T_dna),
-                #         "T_melhor": len(self.best.dna),
-                #     }
-                # )
-
-                # Print
-                # if verbose:
-                #     print(
-                #         "Fim da geração. {} novos indivíduos".format(self.flag_newborn)
-                #     )
-                #     print("Melhor de todos: {}".format(self.best.fitness))
-                #     print("-" * 20)
-
             # Reiniciar rotas
             self.population = []
             self.population = self._genesis(self.Specie, self.population_size - 1)
-            # Nunca matar o melhor de todos
-            self.population.append(self.best)
 
             # Inicializar
             self._decode(self.population)
 
             # Avaliar
-            self.fitnesses = [
-                self._fitness(subject, self.mapa) for subject in self.population
-            ]
+            self.fitnesses = [self._fitness(subject, self.mapa) for subject in self.population]
+
+            # Criar História
+            self.history.extend([subject.to_dict() for subject in self.population])
+
+            # Nunca matar o melhor de todos
+            self.population.append(self.best)
+            self.fitnesses.append(self.best.fitness)
+
+            # Escolher melhor de todos
+            self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
 
             # Print
-            # if verbose:
-            #     print("Meteoro! Reiniciando rotas")
-            # if info:
-            #     print(
-            #         "Meteoro! Melhor de todos:{} - count:{}".format(
-            #             self.best.fitness, count_while
-            #         )
-            #     )
+            #print("Meteoro! Reiniciando rotas")
 
         return self.best
 
@@ -531,18 +537,24 @@ class Genetic:
         self.flag_newbest = False
 
         if child.fitness < parent1.fitness:
+            child.set_parents(parent1, parent2)
             self.__substitute(child, parent1)
 
         elif child.fitness < parent2.fitness:
+            child.set_parents(parent2, parent1)
             self.__substitute(child, parent2)
 
         if child.fitness < self.best.fitness:
             self.best = child
-            self.ancestry.append(child)
+            # self.ancestry.append(child)
             self.flag_newbest = True
 
     def __substitute(self, child, parent):
         i_parent = self.population.index(parent)
+
+        child.set_generation(self.generation)
+        child.set_id(self.current_id)
+        self.current_id += 1
 
         self.population.remove(parent)
         self.population.append(child)
@@ -570,10 +582,20 @@ class Genetic:
     # ---
 
     def _genesis(self, Specie, population_size):
+        current_id = self.current_id
+
         population = [
-            Specie(start_time=self.start_time, version=self.version, **self.kwargs)
-            for _ in range(population_size)
+            Specie(
+                start_time=self.start_time,
+                generation=self.generation,
+                id=current_id + i,
+                **self.kwargs
+            )
+            for i in range(population_size)
         ]
+
+        self.current_id = current_id + population_size
+        # Removed parameter: version=self.version,
         return population
 
     # ---
@@ -592,6 +614,7 @@ class Genetic:
         fit_con = self.__fitness_consumption(subject, mapa)
         fit_cur = self.__fitness_curves(subject, mapa)
         fit_t = self.__fitness_t(subject, mapa)
+        fit_dist = self.__fitness_distance(subject, mapa)
 
         fitness_trace = [
             self.C_d * fit_d,
@@ -599,6 +622,7 @@ class Genetic:
             self.C_con * fit_con,
             self.C_cur * fit_cur,
             self.C_t * fit_t,
+            self.C_dist * fit_dist,
         ]
 
         fitness = sum(fitness_trace)
@@ -621,18 +645,21 @@ class Genetic:
             return 0
         return d
 
-    # def __fitness_obstacles(self, subject, mapa):
-    #     # def __fitness_obstacles is an abstraction of either one of those two following functions
-    #     # __fitness_obstacles_RC and __fitness_obstacles_CC
+    def __fitness_distance(self, subject, mapa):
+        # Prioriza rotas mais curtas
 
-    #     if self.version.minor == "RC":
-    #         return self.__fitness_obstacles_RC(subject, mapa)
+        d = 0
+        length = len(subject.dna_decoded)
+        for i in range(length - 1):
+            A = subject.dna_decoded[i]
+            B = subject.dna_decoded[i + 1]
+            # Distância euclidiana entre o último ponto da rota e o ponto de destino
+            d += sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2)
 
-    #     elif self.version.minor == "CC":
-    #         return self.__fitness_obstacles_CC(subject, mapa)
+        return d
 
-    # def __fitness_obstacles_RC(self, subject, mapa):
     def __fitness_obstacles(self, subject, mapa):
+        # def __fitness_obstacles_RC(self, subject, mapa):
         # Prioriza rotas que não ultrapassem obstáculos
         count = 0
 
@@ -651,30 +678,39 @@ class Genetic:
                     count += 1
 
         return count
+        # def __fitness_obstacles(self, subject, mapa):
+        #     # def __fitness_obstacles is an abstraction of either one of those two following functions
+        #     # __fitness_obstacles_RC and __fitness_obstacles_CC
 
-    # def __fitness_obstacles_CC(self, subject, mapa):
-    #     uncertainty = self.gps_imprecision
+        #     if self.version.minor == "RC":
+        #         return self.__fitness_obstacles_RC(subject, mapa)
 
-    #     # if debug:
-    #     #    print('(   x   ,   y   ) distance | risk(%)')
+        #     elif self.version.minor == "CC":
+        #         return self.__fitness_obstacles_CC(subject, mapa)
 
-    #     risks_points = []
-    #     for gene_decoded in subject.dna_decoded:
-    #         risks_areas = []
-    #         for area in mapa.areas_n_inf:
-    #             wp = CartesianPoint(gene_decoded.x, gene_decoded.y)
+        # def __fitness_obstacles_CC(self, subject, mapa):
+        #     uncertainty = self.gps_imprecision
 
-    #             distance = _distance_wp_area(wp, area)
-    #             risk = _prob_collision(distance, uncertainty)
+        #     # if debug:
+        #     #    print('(   x   ,   y   ) distance | risk(%)')
 
-    #             # if debug:
-    #             #    print('({0:^.1f},{1:^.1f}) {2:8.3f} | {3:}'.format(wp.x, wp.y, distance, round(risk,4)))
+        #     risks_points = []
+        #     for gene_decoded in subject.dna_decoded:
+        #         risks_areas = []
+        #         for area in mapa.areas_n_inf:
+        #             wp = CartesianPoint(gene_decoded.x, gene_decoded.y)
 
-    #             risks_areas.append(risk)
-    #         risks_points.append(sum(risks_areas))
+        #             distance = _distance_wp_area(wp, area)
+        #             risk = _prob_collision(distance, uncertainty)
 
-    #     # print(risks_points)
-    #     return sum(risks_points)
+        #             # if debug:
+        #             #    print('({0:^.1f},{1:^.1f}) {2:8.3f} | {3:}'.format(wp.x, wp.y, distance, round(risk,4)))
+
+        #             risks_areas.append(risk)
+        #         risks_points.append(sum(risks_areas))
+
+        #     # print(risks_points)
+        #     return sum(risks_points)
 
     def __fitness_consumption(self, subject, _):
         # Prioriza rotas com menor consumo de combustível (bateria)

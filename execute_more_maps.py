@@ -6,9 +6,11 @@ import matplotlib.pyplot as plt
 import pickle
 import itertools
 
+from pathlib import Path as PPath
+from multiprocessing import Pool
+
 from genetic.data_definitions import CartesianPoint, Mapa, Version
 from genetic.visualization import plot_map, vis_mapa
-
 
 from genetic.genetic import Genetic, Subject
 
@@ -44,14 +46,14 @@ def run_ags_over_path(path, show=False):
     path = str(path)
     number = re.sub(r"[A-Za-z/\-_\.]", "", path)
     print(f"1. Processing file: {number}")
-    map = read_sgl(path, inflation_rate=0.1, mode="vector")
+    map = read_sgl(path, inflation_rate=0.1)  # , mode="vector")
 
     print("1.1. Read")
 
     ag = Genetic(
         Subject,
         map,
-        version=Version("beta", "RC"),
+        # version=Version("beta", "RC"),
         # Parâmetros da classe Subject:
         px0=map.origin.x,
         py0=map.origin.y,
@@ -60,27 +62,28 @@ def run_ags_over_path(path, show=False):
 
     best = ag.run(info=False)
     print(f"2. AG generated: {number}")
-
-    # name = re.sub(r'(\.sgl)', SUFIX+r'.png', path)
     name = EXPERIMENTS_PATH + f"mode_{MODE}_map_{str(number)}_exec_{EXEC}"
+
+    history = ag.history
+    df = pd.DataFrame(history)
+    df.to_csv(name + "_history.csv", index=False)
 
     vis_mapa(map, best.get_route(), save=name + "_best.png")
 
     with open(name + "_ag.p", "wb") as ag_file:
         pickle.dump(ag, ag_file)
 
-    res = np.array([[subject.fitness, subject.birth_time] for subject in ag.ancestry])
-    # name_fig, name_table, name_routes
-    plot_fitness(
-        res,
-        map,
-        ag,
-        name + "_fitness.png",
-        name + "_fitness2.png",
-        name + "_stats.csv",
-        name + "_bestall.png",
-        show
-    )
+    # res = np.array([[subject.fitness, subject.birth_time] for subject in ag.ancestry])
+    # plot_fitness(
+    #     res,
+    #     map,
+    #     ag,
+    #     name + "_fitness.png",
+    #     name + "_fitness2.png",
+    #     name + "_stats.csv",
+    #     name + "_bestall.png",
+    #     show,
+    # )
 
     print(f"2. Saved: {number}")
 
@@ -95,7 +98,9 @@ def get_specific(array, birth_time_target):
     return np.where(np.isclose(array, birth_time_specific))[0][0]
 
 
-def plot_fitness(np_ar, mapa, ag, name_fig, name_fig2, name_table, name_routes, show=False):
+def plot_fitness(
+    np_ar, mapa, ag, name_fig, name_fig2, name_table, name_routes, show=False
+):
     colors = sub_colors = pl.cm.jet(np.linspace(0, 1, 7))
 
     plt.figure(figsize=(15, 10))
@@ -106,7 +111,28 @@ def plot_fitness(np_ar, mapa, ag, name_fig, name_fig2, name_table, name_routes, 
     sub_routes = []
     sub_names = []
     table = []
-    for a, j in enumerate([5, 10, 20, 30, 40, 50, 60]):
+    for a, j in enumerate(
+        [
+            10,
+            20,
+            30,
+            40,
+            50,
+            60,
+            70,
+            80,
+            90,
+            100,
+            110,
+            120,
+            130,
+            140,
+            150,
+            160,
+            170,
+            180,
+        ]
+    ):
         index = get_specific(np_ar, j)
         point = np_ar[index]
         plt.vlines(
@@ -151,7 +177,7 @@ def plot_fitness(np_ar, mapa, ag, name_fig, name_fig2, name_table, name_routes, 
         "Margin Birth Time",
     ]
     aux_table = table.iloc[:, ::-1].round(2)
-    aux_table.to_csv(name_table)
+    aux_table.to_csv(name_table, index=False)
 
     plt.figure()
     plt.plot(table["Margin Birth Time"], table["Fitness"])
@@ -182,7 +208,7 @@ def plot_fitness(np_ar, mapa, ag, name_fig, name_fig2, name_table, name_routes, 
 # =============================================================================
 
 
-MODE = "R"
+MODE = "R-PC"
 EXEC = "1"
 
 
@@ -193,27 +219,32 @@ wp_ori = CartesianPoint(0, 0)
 wp_des = CartesianPoint(0, -10)
 
 par_RC = {
-    "max_exec_time": 60,
-    "C_d": 200,
-    "C_obs": 200,  # 1000,
-    "C_con": 0,  # 40,
-    "C_cur": 10,  # 20,
-    "C_t": 0,  # 10,
+    "max_exec_time": 180,
+    "C_d": 1000,
+    "C_obs": 4000,
+    "C_con": 0,
+    "C_cur": 0,
+    "C_t": 0,
+    "C_dist": 1,
     "v_min": -3.0,
     "v_max": 3.0,
     "T_min": 5,
     "T_max": 20,
     "a_min": -1.0,
     "a_max": 1.0,
+    "e_min": -3,
+    "e_max": 3,
     "min_precision": 0.1,
     "gps_imprecision": 0,
-    "population_size": 20,
+    "population_size": 40,
+    "taxa_cross": 2,
+    "mutation_prob": 0.7,
 }
 
 # =============================================================================
 # use essa célula para visualizar um mapa (sem a rota)
 
-# mapa_name = "10"  # selecione o numero do mapa (string)
+# mapa_name = "10"
 
 # mapa_teste = read_sgl(MAPS_PATH + mapa_name + ".sgl", inflation_rate=0.1, mode="vector")
 # vis_mapa(mapa_teste)
@@ -221,16 +252,15 @@ par_RC = {
 # =============================================================================
 # aqui executa o AG para um mapa apenas
 
+# mapa_name = "06"
+# ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", show=False)
 
-# Run one map only
-# informe o numero do mapa a ser rodado (use duas casa. e.g. 04, 06, 09, 25, 49)
-mapa_name = "06"
-
-ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", show=False)
-
-# Como ele tem a opção de rodar muitos mapas, nãão estou printando as mensagens na tela. Sóó esperar.
 # =============================================================================
+# # Run all maps and paralellize the execution
+pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
 
-history = ag.history
-df = pd.DataFrame(history)
-df.to_csv(f"{EXPERIMENTS_PATH}mode_{MODE}_map_{mapa_name}_exec_{EXEC}_history.csv")
+# Iterate over different maps in parallel
+p = Pool(processes=50)
+p.map(run_ags_over_path, pathlist)
+
+# =============================================================================
