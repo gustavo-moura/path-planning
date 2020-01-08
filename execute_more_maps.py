@@ -209,7 +209,7 @@ def plot_fitness(
 
 
 MODE = "R-PC"
-EXEC = "1"
+EXEC = "2"
 
 
 MAPS_PATH = "./maps/NonRegular/"
