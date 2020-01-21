@@ -41,6 +41,7 @@ def run_genetic(**kwargs):
     destination_long = kwargs["destination_long"]
     destination_alt = kwargs["destination_alt"]
     map_id = kwargs["map_id"]
+    PATH = kwargs["path"]
 
     print(origin_lat)
 
