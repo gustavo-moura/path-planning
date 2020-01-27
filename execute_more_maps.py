@@ -9,7 +9,7 @@ import itertools
 from pathlib import Path as PPath
 from multiprocessing import Pool
 
-from genetic.data_definitions import CartesianPoint, Mapa, Version
+from genetic.data_definitions import CartesianPoint, Mapa
 from genetic.visualization import plot_map, vis_mapa
 
 from genetic.genetic import Genetic, Subject
@@ -206,61 +206,59 @@ def plot_fitness(
 
 # MAIN
 # =============================================================================
+if __name__ == '__main__':
 
+    MODE = "F"
+    EXEC = "1"
 
-MODE = "R-PC"
-EXEC = "2"
+    MAPS_PATH = "./maps/NonRegular/"
+    EXPERIMENTS_PATH = "./experiments/"
 
+    wp_ori = CartesianPoint(0, 0)
+    wp_des = CartesianPoint(0, -10)
 
-MAPS_PATH = "./maps/NonRegular/"
-EXPERIMENTS_PATH = "./experiments/"
+    par_RC = {
+        'taxa_cross': 5,
+        'population_size': 10,
+        'max_exec_time': 10,  # !
+        'C_d': 100,
+        'C_obs': 1000,
+        'C_con': 0,
+        'C_cur': 0,
+        'C_t': 10,
+        'C_dist': 1,
+        'v_min': -3.0,
+        'v_max': 3.0,
+        'e_min': -3,
+        'e_max': 3,
+        'a_min': -2.0,
+        'a_max': 2.0,
+        'T_min': 1,
+        'T_max': 25,
+        'mutation_prob': 0.7,
+        'gps_imprecision': 1,
+    }
 
-wp_ori = CartesianPoint(0, 0)
-wp_des = CartesianPoint(0, -10)
+    # =============================================================================
+    # use essa célula para visualizar um mapa (sem a rota)
 
-par_RC = {
-    "max_exec_time": 180,
-    "C_d": 1000,
-    "C_obs": 4000,
-    "C_con": 0,
-    "C_cur": 0,
-    "C_t": 0,
-    "C_dist": 1,
-    "v_min": -3.0,
-    "v_max": 3.0,
-    "T_min": 5,
-    "T_max": 20,
-    "a_min": -1.0,
-    "a_max": 1.0,
-    "e_min": -3,
-    "e_max": 3,
-    "min_precision": 0.1,
-    "gps_imprecision": 0,
-    "population_size": 40,
-    "taxa_cross": 2,
-    "mutation_prob": 0.7,
-}
+    # mapa_name = "10"
 
-# =============================================================================
-# use essa célula para visualizar um mapa (sem a rota)
+    # mapa_teste = read_sgl(MAPS_PATH + mapa_name + ".sgl", inflation_rate=0.1, mode="vector")
+    # vis_mapa(mapa_teste)
 
-# mapa_name = "10"
+    # =============================================================================
+    # aqui executa o AG para um mapa apenas
 
-# mapa_teste = read_sgl(MAPS_PATH + mapa_name + ".sgl", inflation_rate=0.1, mode="vector")
-# vis_mapa(mapa_teste)
+    # mapa_name = "06"
+    # ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", show=False)
 
-# =============================================================================
-# aqui executa o AG para um mapa apenas
+    # =============================================================================
+    # # Run all maps and paralellize the execution
+    pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
 
-# mapa_name = "06"
-# ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", show=False)
+    # Iterate over different maps in parallel
+    p = Pool(processes=50)
+    p.map(run_ags_over_path, pathlist)
 
-# =============================================================================
-# # Run all maps and paralellize the execution
-pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
-
-# Iterate over different maps in parallel
-p = Pool(processes=50)
-p.map(run_ags_over_path, pathlist)
-
-# =============================================================================
+    # =============================================================================

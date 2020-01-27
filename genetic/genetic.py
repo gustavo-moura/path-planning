@@ -1,7 +1,6 @@
 import collections
 import random
 import time
-import copy
 
 from math import cos, sin, sqrt, ceil
 
@@ -471,7 +470,7 @@ class Genetic:
         self.history = [subject.to_dict() for subject in self.population]
 
         # Escolher melhor de todos
-        self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
+        self.best = self.population[self.fitnesses.index(min(self.fitnesses))]
 
         # self.ancestry.append(self.best)
 
@@ -487,10 +486,7 @@ class Genetic:
                 for _ in range(ceil(self.taxa_cross * self.population_size)):
 
                     # Seleção por torneio
-                    parent1, parent2 = self._tournament(
-                        self.population,
-                        k=self.k_tournament
-                    )
+                    parent1, parent2 = self._tournament(self.population, k=self.k_tournament)
 
                     # Crossover
                     child = parent1.crossover(parent2, self.Specie, **self.kwargs)
@@ -522,10 +518,10 @@ class Genetic:
             self.fitnesses.append(self.best.fitness)
 
             # Escolher melhor de todos
-            self.best = self.population[self.fitnesses.index(max(self.fitnesses))]
+            self.best = self.population[self.fitnesses.index(min(self.fitnesses))]
 
             # Print
-            #print("Meteoro! Reiniciando rotas")
+            # print("Meteoro! Reiniciando rotas")
 
         return self.best
 
@@ -616,6 +612,15 @@ class Genetic:
         fit_t = self.__fitness_t(subject, mapa)
         fit_dist = self.__fitness_distance(subject, mapa)
 
+        save_fitness_trace = [
+            fit_d,
+            fit_obs,
+            fit_con,
+            fit_cur,
+            fit_t,
+            fit_dist,
+        ]
+
         fitness_trace = [
             self.C_d * fit_d,
             self.C_obs * fit_obs,
@@ -627,7 +632,7 @@ class Genetic:
 
         fitness = sum(fitness_trace)
 
-        subject.set_fitness(fitness, fitness_trace)
+        subject.set_fitness(fitness, save_fitness_trace)
 
         return fitness
 
