@@ -208,7 +208,7 @@ def plot_fitness(
 # =============================================================================
 if __name__ == '__main__':
 
-    MODE = "F"
+    MODE = "B"
     EXEC = "1"
 
     MAPS_PATH = "./maps/NonRegular/"
@@ -220,15 +220,15 @@ if __name__ == '__main__':
     par_RC = {
         'taxa_cross': 5,
         'population_size': 10,
-        'max_exec_time': 10,  # !
-        'C_d': 100,
-        'C_obs': 1000,
-        'C_con': 0,
-        'C_cur': 0,
-        'C_t': 10,
+        'max_exec_time': 180,
+        'C_d': 10000,
+        'C_obs': 10000,
+        'C_con': 500,
+        'C_cur': 100,
+        'C_t': 100,
         'C_dist': 1,
-        'v_min': -3.0,
-        'v_max': 3.0,
+        'v_min': -3.0,         # !
+        'v_max': 3.0,          # !
         'e_min': -3,
         'e_max': 3,
         'a_min': -2.0,
