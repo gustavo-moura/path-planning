@@ -33,6 +33,12 @@ Parâmetros utilizados:
     }
 ```
 
+### Results
+
+![image](mode_A/mode_A_exec_1_category_routes.png)
+
+![image](mode_A/mode_A_exec_1_category_maps.png)
+
 ## Mode B
 
 Parâmetros utilizados:
@@ -61,7 +67,11 @@ Parâmetros utilizados:
     }
 ```
 
-------
+### Results
+
+![image](mode_B/mode_B_exec_1_category_routes.png)
+
+![image](mode_B/mode_B_exec_1_category_maps.png)
 
 ## Mode C
 
@@ -91,6 +101,12 @@ par_RC = {
 }
 ```
 
+### Results
+
+![image](mode_C/mode_C_exec_1_category_routes.png)
+
+![image](mode_C/mode_C_exec_1_category_maps.png)
+
 ## Mode D
 
 Parâmetros utilizados:
@@ -119,6 +135,12 @@ par_RC = {
 }
 ```
 
+### Results
+
+![image](mode_D/mode_D_exec_1_category_routes.png)
+
+![image](mode_D/mode_D_exec_1_category_maps.png)
+
 ## Mode E
 
 Parâmetros utilizados:
@@ -146,6 +168,12 @@ par_RC = {
     'gps_imprecision': 1,
 }
 ```
+
+### Results
+
+![image](mode_E/mode_E_exec_1_category_routes.png)
+
+![image](mode_E/mode_E_exec_1_category_maps.png)
 
 ## Mode F
 
@@ -178,6 +206,12 @@ par_RC = {
 }
 ```
 
+### Results
+
+![image](mode_F/mode_F_exec_1_category_routes.png)
+
+![image](mode_F/mode_F_exec_1_category_maps.png)
+
 ## Mode G
 
 Parâmetros utilizados:
@@ -205,6 +239,14 @@ par_RC = {
     'gps_imprecision': 1,
 }
 ```
+
+### Results
+
+![image](mode_G/mode_G_exec_1_category_routes.png)
+
+![image](mode_G/mode_G_exec_1_category_maps.png)
+
+# TODO
 
 ## Mode R-PC
 
