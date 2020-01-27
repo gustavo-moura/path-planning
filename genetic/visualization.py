@@ -66,6 +66,10 @@ def plot_map(wp_style="-x", **kwargs):
         for patch in patches:
             ax.add_patch(patch)
 
+        if "texts" in kwargs:
+            for text, area in zip(kwargs['texts'], areas):
+                ax.annotate(text, (area[0].x, area[0].y))
+
     # Plot origin and destination
     if "origem" in kwargs and "destino" in kwargs:
         origem = kwargs["origem"]
