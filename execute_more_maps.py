@@ -15,6 +15,44 @@ from genetic.visualization import plot_map, vis_mapa
 from genetic.genetic import Genetic, Subject
 
 
+# def read_tipos(labels):
+#     # tipos = []
+#     # for i, y in zip(range(50), labels):
+#     map_tipos = []
+#     for j in range(20):
+#         if j in labels:
+#             map_tipos.append('b')
+#         else:
+#             map_tipos.append('n')
+#     return map_tipos
+#         # tipos.append(map_tipos)
+#     # return tipos
+
+
+def read_bonus(path):
+    with open(path, 'r') as f:
+        labels = []
+        for i in f:
+            map_labels = []
+            for j in re.sub('\n', '', i).split(','):
+                map_labels.append(int(j))
+            labels.append(map_labels)
+    return labels
+
+
+def separate_areas(areas, indexes):
+    areas_n = []
+    areas_b = []
+
+    for i, area in enumerate(areas):
+        if i in indexes:
+            areas_b.append(area)
+        else:
+            areas_n.append(area)
+
+    return areas_n, areas_b
+
+
 def sgl_read_areas(lines):
     """From the map file definition reads each area"""
 
@@ -36,9 +74,17 @@ def sgl_read_areas(lines):
 def read_sgl(path, **kwargs):
     with open(path, "r") as f:
         lines = f.readlines()
-        map = Mapa(
-            wp_ori, wp_des, sgl_read_areas(lines), **kwargs
-        )  # inflation_rate=1, mode='scalar'
+        areas = sgl_read_areas(lines)
+
+        if 'bonus_index' in kwargs:
+            areas_n, areas_b = separate_areas(areas, kwargs['bonus_index'])
+        else:
+            areas_n = areas
+            areas_b = []
+
+        # inflation_rate=1, mode='scalar'
+        map = Mapa(wp_ori, wp_des, areas_n, areas_b,
+                   inflation_rate=kwargs['inflation_rate'])
     return map
 
 
@@ -46,7 +92,9 @@ def run_ags_over_path(path, show=False):
     path = str(path)
     number = re.sub(r"[A-Za-z/\-_\.]", "", path)
     print(f"1. Processing file: {number}")
-    map = read_sgl(path, inflation_rate=0.1)  # , mode="vector")
+    # map = read_sgl(path, inflation_rate=0.1)  # , mode="vector")
+    map = read_sgl(path, inflation_rate=0.1, bonus_index=labels[int(number)])
+    # tipos = read_tipos(bonus_labels[int(number)])
 
     print("1.1. Read")
 
@@ -111,28 +159,7 @@ def plot_fitness(
     sub_routes = []
     sub_names = []
     table = []
-    for a, j in enumerate(
-        [
-            10,
-            20,
-            30,
-            40,
-            50,
-            60,
-            70,
-            80,
-            90,
-            100,
-            110,
-            120,
-            130,
-            140,
-            150,
-            160,
-            170,
-            180,
-        ]
-    ):
+    for a, j in enumerate(range(0, 190, 10)):
         index = get_specific(np_ar, j)
         point = np_ar[index]
         plt.vlines(
@@ -157,7 +184,8 @@ def plot_fitness(
         table.append(
             np.append(
                 index,
-                np.append([str(ag.ancestry[index].fitness_trace)], np.append(point, j)),
+                np.append([str(ag.ancestry[index].fitness_trace)],
+                          np.append(point, j)),
             )
         )
         plt.legend()
@@ -192,7 +220,8 @@ def plot_fitness(
     tipos = ["n" for _ in range(len(areas))]
     plot_map(
         areas=areas,  # Mapa usado
-        labels=tipos,  # Tipo do mapa {'n','p','b'} <- Não afeta o genético, só muda a visualização
+        # Tipo do mapa {'n','p','b'} <- Não afeta o genético, só muda a visualização
+        labels=tipos,
         origem=mapa.origin,  # waypoint de origem
         destino=mapa.destination,  # waypoint de destino
         multi_waypoints=sub_routes,  # rotas do melhores de todos
@@ -204,15 +233,270 @@ def plot_fitness(
     )
 
 
+def get_parameter(choice):
+
+    parameters = {
+        "A": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,
+            'C_d': 10000,
+            'C_obs': 10000,
+            'C_con': 500,
+            'C_cur': 100,
+            'C_t': 100,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': 11.1,
+            'v_max': 30.5,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "B": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,
+            'C_d': 10000,
+            'C_obs': 10000,
+            'C_con': 500,
+            'C_cur': 100,
+            'C_t': 100,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,         # !
+            'v_max': 3.0,          # !
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "C": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,
+            'C_d': 100,            # !
+            'C_obs': 1000,         # !
+            'C_con': 0,            # !
+            'C_cur': 0,            # !
+            'C_t': 10,             # !
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "D": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 60,  # !
+            'C_d': 100,
+            'C_obs': 1000,
+            'C_con': 0,
+            'C_cur': 0,
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "E": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 10,  # !
+            'C_d': 100,
+            'C_obs': 1000,
+            'C_con': 0,
+            'C_cur': 0,
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "F": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 10,
+            'C_d': 100,
+            'C_obs': 1000,
+            'C_con': 10, # !
+            'C_cur': 10, # 1
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "G": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,  # !
+            'C_d': 100,
+            'C_obs': 1000,
+            'C_con': 0,
+            'C_cur': 0,
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': 0,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+        },
+        "EMA": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,
+            'C_d': 0,
+            'C_obs': 10000,
+            'C_con': 500,
+            'C_cur': 100,
+            'C_t': 100,
+            'C_dist': 1,
+            'C_z_bonus': -1000,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+            'planning_mode': 'emergency',
+        },
+        "EMB": {
+            'taxa_cross': 5,
+            'population_size': 10,
+            'max_exec_time': 180,
+            'C_d': 0,
+            'C_obs': 10000,
+            'C_con': 10,  # !
+            'C_cur': 10,  # !
+            'C_t': 10,  # !
+            'C_dist': 1,
+            'C_z_bonus': -10000,  # !
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+            'planning_mode': 'emergency',
+        },
+        "EMC": {
+            'taxa_cross': 5,
+            'population_size': 25,  # !
+            'max_exec_time': 180,
+            'C_d': 0,
+            'C_obs': 10000,
+            'C_con': 10,
+            'C_cur': 10,
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': -10000,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+            'planning_mode': 'emergency',
+        },
+        "EMD": {
+            'taxa_cross': 5,
+            'population_size': 25,
+            'max_exec_time': 300,  # !
+            'C_d': 0,
+            'C_obs': 10000,
+            'C_con': 10,
+            'C_cur': 10,
+            'C_t': 10,
+            'C_dist': 1,
+            'C_z_bonus': -10000,
+            'v_min': -3.0,
+            'v_max': 3.0,
+            'e_min': -3,
+            'e_max': 3,
+            'a_min': -2.0,
+            'a_max': 2.0,
+            'T_min': 1,
+            'T_max': 25,
+            'mutation_prob': 0.7,
+            'gps_imprecision': 1,
+            'planning_mode': 'emergency',
+        }
+    }
+
+    return parameters[choice]
+
+
 # MAIN
 # =============================================================================
 if __name__ == '__main__':
 
-    MODE = "B"
+    #MODE = "EMA"
     EXEC = "1"
 
     MAPS_PATH = "./maps/NonRegular/"
     EXPERIMENTS_PATH = "./experiments/"
+    BONUS_PATH = './maps/b_n/bonus_regions.txt'
 
     wp_ori = CartesianPoint(0, 0)
     wp_des = CartesianPoint(0, -10)
@@ -221,14 +505,15 @@ if __name__ == '__main__':
         'taxa_cross': 5,
         'population_size': 10,
         'max_exec_time': 180,
-        'C_d': 10000,
+        'C_d': 0,
         'C_obs': 10000,
-        'C_con': 500,
-        'C_cur': 100,
-        'C_t': 100,
+        'C_con': 10,
+        'C_cur': 10,
+        'C_t': 10,
         'C_dist': 1,
-        'v_min': -3.0,         # !
-        'v_max': 3.0,          # !
+        'C_z_bonus': -10000,
+        'v_min': -3.0,
+        'v_max': 3.0,
         'e_min': -3,
         'e_max': 3,
         'a_min': -2.0,
@@ -237,7 +522,10 @@ if __name__ == '__main__':
         'T_max': 25,
         'mutation_prob': 0.7,
         'gps_imprecision': 1,
+        'planning_mode': 'emergency',
     }
+
+    labels = read_bonus(BONUS_PATH)
 
     # =============================================================================
     # use essa célula para visualizar um mapa (sem a rota)
@@ -250,15 +538,32 @@ if __name__ == '__main__':
     # =============================================================================
     # aqui executa o AG para um mapa apenas
 
-    # mapa_name = "06"
-    # ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", show=False)
+    # mapa_name = "27"
+    # ag = run_ags_over_path(MAPS_PATH + mapa_name + ".sgl", bonus_labels=labels, show=False)
 
     # =============================================================================
-    # # Run all maps and paralellize the execution
-    pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
+    # # # Run all maps and paralellize the execution
+    # pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
 
-    # Iterate over different maps in parallel
-    p = Pool(processes=50)
-    p.map(run_ags_over_path, pathlist)
+    # # Iterate over different maps in parallel
+    # p = Pool(processes=50)
+    # p.map(run_ags_over_path, pathlist)
+
+    # =============================================================================
+
+    # # # Run all maps and paralellize the execution and run with different params
+
+    for mode in ['EMA', 'EMB', 'EMC', 'EMD']:
+        print('-' * 20, 'Starting execution of mode: ', mode)
+        MODE = mode
+        par_RC = get_parameter(mode)
+
+        pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
+
+        # Iterate over different maps in parallel
+        p = Pool(processes=50)
+        p.map(run_ags_over_path, pathlist)
+        print('-' * 20, 'Finished mode: ', mode)
+
 
     # =============================================================================

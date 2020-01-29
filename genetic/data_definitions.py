@@ -19,16 +19,14 @@ class CartesianPoint:
 
 
 class Mapa:
-    def __init__(self, origin, destination, areas_n, inflation_rate=0.1):
+    def __init__(self, origin, destination, areas_n=None, areas_b=None, inflation_rate=0.1):
         self.origin = origin  # CartesianPoint : Define o ponto de partida da rota
-        self.destination = (
-            destination  # CartesianPoint : Define o ponto de destino da rota
-        )
-        self.areas_n = areas_n  # [area, ...]
-        # area = [CartesianPoint(),...]
-        self.areas_n_inf = [
-            self._inflate_area(area, inflation_rate=inflation_rate) for area in areas_n
-        ]
+        self.destination = destination  # CartesianPoint : Define o ponto de destino da rota
+        self.areas_n = areas_n  # [area, ...] : Areas nao-navegaveis
+        #                       # area = [CartesianPoint(),...]
+        self.areas_n_inf = [self._inflate_area(area, inflation_rate=inflation_rate) for area in areas_n]
+
+        self.areas_b = areas_b  # [area, ...] : Areas bonificadoras
 
     def _inflate_area(self, area, inflation_rate):
 

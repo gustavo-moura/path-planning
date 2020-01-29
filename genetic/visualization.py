@@ -216,6 +216,39 @@ def _graph_sub(A, B):
 
 
 def vis_mapa(mapa, route=None, **qwargs):
+    areas_n = [area for area in itertools.chain(mapa.areas_n, mapa.areas_n_inf)]
+    tipos_n = ['n' for _ in range(len(areas_n))]
+
+    areas_b = mapa.areas_b
+    tipos_b = ['b' for _ in range(len(areas_b))]
+
+    areas = []
+    areas.extend(areas_n)
+    areas.extend(areas_b)
+
+    tipos = []
+    tipos.extend(tipos_n)
+    tipos.extend(tipos_b)
+
+    kwargs = {
+        "areas": areas,
+        "labels": tipos,
+        "origem": mapa.origin,
+        "destino": mapa.destination,
+        # "texts": [i for i in range(0,20)]
+    }
+
+    if route:
+        kwargs["waypoints"] = route
+
+    kwargs.update(qwargs)
+
+    plot_map(**kwargs)
+
+    # return _tipos
+
+
+def vis_mapa_1(mapa, route=None, **qwargs):
     areas = [area for area in itertools.chain(mapa.areas_n, mapa.areas_n_inf)]
     tipos = ["n" for _ in range(len(areas))]
 

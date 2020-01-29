@@ -246,6 +246,69 @@ par_RC = {
 
 ![image](mode_G/mode_G_exec_1_category_maps.png)
 
+
+
+
+## Mode EMA 1,2
+
+com função fitness de zona bonificadora.
+1 - função que considera todos os pontos
+2 e adiante - função que considera somente o ultimo ponto da rota
+
+```python
+par_RC = {
+        'taxa_cross': 5,
+        'population_size': 10,
+        'max_exec_time': 180,
+        'C_d': 0,
+        'C_obs': 10000,
+        'C_con': 500,
+        'C_cur': 100,
+        'C_t': 100,
+        'C_dist': 1,
+        'C_z_bonus': -1000,
+        'v_min': -3.0,
+        'v_max': 3.0,
+        'e_min': -3,
+        'e_max': 3,
+        'a_min': -2.0,
+        'a_max': 2.0,
+        'T_min': 1,
+        'T_max': 25,
+        'mutation_prob': 0.7,
+        'gps_imprecision': 1,
+        'planning_mode': 'emergency',
+    }
+```
+
+## Mode EMA 3, 4
+
+```python
+    par_RC = {
+        'taxa_cross': 5,
+        'population_size': 10,
+        'max_exec_time': 180,
+        'C_d': 0,
+        'C_obs': 10000,
+        'C_con': 10,
+        'C_cur': 10,
+        'C_t': 10,
+        'C_dist': 1,
+        'C_z_bonus': -10000,
+        'v_min': -3.0,
+        'v_max': 3.0,
+        'e_min': -3,
+        'e_max': 3,
+        'a_min': -2.0,
+        'a_max': 2.0,
+        'T_min': 1,
+        'T_max': 25,
+        'mutation_prob': 0.7,
+        'gps_imprecision': 1,
+        'planning_mode': 'emergency',
+    }
+```
+
 # TODO
 
 ## Mode R-PC
@@ -276,3 +339,5 @@ par_RC = {
     "mutation_prob": 0.7,
 }
 ```
+
+

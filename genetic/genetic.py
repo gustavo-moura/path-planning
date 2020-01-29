@@ -399,41 +399,35 @@ class Genetic:
         C_cur=100,
         C_t=10,
         C_dist=1,
+        C_z_bonus=-100,
         max_exec_time=1,
         min_precision=1.0,
         k_tournament=2,
         gps_imprecision=1,
         big_delta=1,
+        planning_mode='planning',
         **kwargs
     ):
         # Modelo
         self.Specie = Specie  # objeto : Definição da classe (não a instância)
-        self.mapa = mapa  # Mapa   : Mapa com as características da missão
+        self.mapa = mapa  # Mapa : Mapa com as características da missão
 
         # Parâmetros
         self.taxa_cross = taxa_cross  # float : Taxa de ocorrencia do crossover [0,1]
-        self.population_size = (
-            population_size  # int   : Quantidade máxima de indivíduos na população
-        )
-        self.C_d = C_d  # int   : Custo associado ao fitness de destino
-        self.C_obs = C_obs  # int   : Custo associado ao fitness de obstáculos
-        self.C_con = (
-            C_con  # int   : Custo associado ao fitness de consumo de combustível
-        )
-        self.C_cur = C_cur  # int   : Custo associado ao fitness de curvatura da rota
-        self.C_t = C_t  # int   : Custo associado ao fitness do tamanho do DNA (T ou horizonte de planejamento)
-        self.C_dist = C_dist
-        self.max_exec_time = (
-            max_exec_time  # float : Tempo máximo de execução - Stop criteria (segundos)
-        )
-        self.min_precision = (
-            min_precision  # float : Precisão mínima de acerto ao destino (metros)
-        )
-        self.k_tournament = (
-            k_tournament  # int   : Quantidade de indivíduos disputando o torneio
-        )
+        self.population_size = population_size  # int : Quantidade máxima de indivíduos na população
+        self.C_d = C_d  # int : Custo associado ao fitness de destino
+        self.C_obs = C_obs  # int : Custo associado ao fitness de obstáculos
+        self.C_con = C_con  # int : Custo associado ao fitness de consumo de combustível
+        self.C_cur = C_cur  # int : Custo associado ao fitness de curvatura da rota
+        self.C_t = C_t  # int : Custo associado ao fitness do tamanho do DNA (T ou horizonte de planejamento)
+        self.C_dist = C_dist  # int : Custo associado ao fitness de tamanho da rota.
+        self.C_z_bonus = C_z_bonus  # int : Custo associado ao fitness de zonas bonificadoras. Esse custo deve ser negativo (< 0).
+        self.max_exec_time = max_exec_time  # float : Tempo máximo de execução - Stop criteria (segundos)
+        self.min_precision = min_precision  # float : Precisão mínima de acerto ao destino (metros)
+        self.k_tournament = k_tournament  # int : Quantidade de indivíduos disputando o torneio
         self.gps_imprecision = gps_imprecision  # float : Imprecisão do GPS (metros)
         self.big_delta = big_delta
+        self.planning_mode = planning_mode  # str : Diz qual tipo de função fitness será utilizada: planning, emergency
 
         # Versionamento
         # version=Version("beta", "RC"),
@@ -604,6 +598,92 @@ class Genetic:
     # ---
 
     def _fitness(self, subject, mapa):
+        if self.planning_mode == 'planning':
+            return self._fitness_planning(subject, mapa)
+
+        elif self.planning_mode == 'emergency':
+            return self._fitness_emergency(subject, mapa)
+
+    def _fitness_emergency(self, subject, mapa):
+
+        #fit_d = self.__fitness_destination(subject, mapa)
+        fit_obs = self.__fitness_obstacles(subject, mapa)
+        fit_con = self.__fitness_consumption(subject, mapa)
+        fit_cur = self.__fitness_curves(subject, mapa)
+        fit_t = self.__fitness_t(subject, mapa)
+        fit_dist = self.__fitness_distance(subject, mapa)
+        fit_z_bonus = self.__fitness_z_bonus(subject, mapa)
+
+        save_fitness_trace = [
+            0, #fit_d,
+            fit_obs,
+            fit_con,
+            fit_cur,
+            fit_t,
+            fit_dist,
+            fit_z_bonus,
+        ]
+
+        fitness_trace = [
+            0, #self.C_d * fit_d,
+            self.C_obs * fit_obs,
+            self.C_con * fit_con,
+            self.C_cur * fit_cur,
+            self.C_t * fit_t,
+            self.C_dist * fit_dist,
+            self.C_z_bonus * fit_z_bonus
+        ]
+
+        fitness = sum(fitness_trace)
+
+        subject.set_fitness(fitness, save_fitness_trace)
+
+        return fitness
+
+    def __fitness_z_bonus(self, subject, mapa):
+        # Usa o Ray Casting para avaliar se o ponto final da rota está em uma região bonificadora
+
+        count = 0
+
+        gene_decoded = subject.dna_decoded[-1]
+
+        # Utiliza as áreas bonificadoras para cálculo
+        for area in mapa.areas_b:
+            wp1 = CartesianPoint(gene_decoded.x, gene_decoded.y)
+            # wp2 = CartesianPoint(gene_decoded_t2.x, gene_decoded_t2.y)
+
+            # Calcula se algum waypoint está dentro de alguma área
+            if point_in_polygon(wp1, area):
+                count += 1
+
+            # Calcula se alguma conexão entre os waypoints intersecciona alguma área
+            # if segment_in_polygon(wp1, wp2, area):
+            #     count += 1
+
+        return count
+
+    # def __fitness_z_bonus(self, subject, mapa):
+    #     # Usa o Ray Casting para avaliar se os pontos da rota estão em uma região bonificadora
+
+    #     count = 0
+
+    #     for gene_decoded_t1, gene_decoded_t2 in pairwise(subject.dna_decoded):
+    #         # Utiliza somente as áreas infladas para cálculo
+    #         for area_n in mapa.areas_b:
+    #             wp1 = CartesianPoint(gene_decoded_t1.x, gene_decoded_t1.y)
+    #             wp2 = CartesianPoint(gene_decoded_t2.x, gene_decoded_t2.y)
+
+    #             # Calcula se algum waypoint está dentro de alguma área
+    #             if point_in_polygon(wp1, area_n):
+    #                 count += 1
+
+    #             # Calcula se alguma conexão entre os waypoints intersecciona alguma área
+    #             if segment_in_polygon(wp1, wp2, area_n):
+    #                 count += 1
+
+    #     return count
+
+    def _fitness_planning(self, subject, mapa):
 
         fit_d = self.__fitness_destination(subject, mapa)
         fit_obs = self.__fitness_obstacles(subject, mapa)
