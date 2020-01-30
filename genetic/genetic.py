@@ -6,7 +6,7 @@ from math import cos, sin, sqrt, ceil
 
 # from itertools import tee
 
-from genetic.utils import pairwise, point_in_polygon, segment_in_polygon
+from genetic.utils import pairwise, point_in_polygon, segment_in_polygon, euclidean_distance
 
 # from genetic.utils import _distance_wp_area, _prob_collision
 
@@ -606,7 +606,7 @@ class Genetic:
 
     def _fitness_emergency(self, subject, mapa):
 
-        #fit_d = self.__fitness_destination(subject, mapa)
+        # fit_d = self.__fitness_destination(subject, mapa)
         fit_obs = self.__fitness_obstacles(subject, mapa)
         fit_con = self.__fitness_consumption(subject, mapa)
         fit_cur = self.__fitness_curves(subject, mapa)
@@ -615,7 +615,7 @@ class Genetic:
         fit_z_bonus = self.__fitness_z_bonus(subject, mapa)
 
         save_fitness_trace = [
-            0, #fit_d,
+            0,  # fit_d,
             fit_obs,
             fit_con,
             fit_cur,
@@ -625,7 +625,7 @@ class Genetic:
         ]
 
         fitness_trace = [
-            0, #self.C_d * fit_d,
+            0,  # self.C_d * fit_d,
             self.C_obs * fit_obs,
             self.C_con * fit_con,
             self.C_cur * fit_cur,
@@ -644,6 +644,7 @@ class Genetic:
         # Usa o Ray Casting para avaliar se o ponto final da rota está em uma região bonificadora
 
         count = 0
+        distances = []
 
         gene_decoded = subject.dna_decoded[-1]
 
@@ -656,9 +657,15 @@ class Genetic:
             if point_in_polygon(wp1, area):
                 count += 1
 
+            # Calcula a distância do ultimo ponto da rota com as zonas bonificadoras
+            distances.append(euclidean_distance(wp1, area[0]))
+
             # Calcula se alguma conexão entre os waypoints intersecciona alguma área
             # if segment_in_polygon(wp1, wp2, area):
             #     count += 1
+
+        if count == 0:
+            count = -sum(distances)  # *-1 para penalizar a distância, i.e., quanto mais longe de uma zona bonificadora, pior.
 
         return count
 

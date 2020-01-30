@@ -491,7 +491,7 @@ def get_parameter(choice):
 # =============================================================================
 if __name__ == '__main__':
 
-    #MODE = "EMA"
+    MODE = "EMC"
     EXEC = "1"
 
     MAPS_PATH = "./maps/NonRegular/"
@@ -500,30 +500,6 @@ if __name__ == '__main__':
 
     wp_ori = CartesianPoint(0, 0)
     wp_des = CartesianPoint(0, -10)
-
-    par_RC = {
-        'taxa_cross': 5,
-        'population_size': 10,
-        'max_exec_time': 180,
-        'C_d': 0,
-        'C_obs': 10000,
-        'C_con': 10,
-        'C_cur': 10,
-        'C_t': 10,
-        'C_dist': 1,
-        'C_z_bonus': -10000,
-        'v_min': -3.0,
-        'v_max': 3.0,
-        'e_min': -3,
-        'e_max': 3,
-        'a_min': -2.0,
-        'a_max': 2.0,
-        'T_min': 1,
-        'T_max': 25,
-        'mutation_prob': 0.7,
-        'gps_imprecision': 1,
-        'planning_mode': 'emergency',
-    }
 
     labels = read_bonus(BONUS_PATH)
 
@@ -543,27 +519,28 @@ if __name__ == '__main__':
 
     # =============================================================================
     # # # Run all maps and paralellize the execution
-    # pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
+    pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
 
-    # # Iterate over different maps in parallel
-    # p = Pool(processes=50)
-    # p.map(run_ags_over_path, pathlist)
+    # Iterate over different maps in parallel
+    par_RC = get_parameter(MODE)
+    p = Pool(processes=50)
+    p.map(run_ags_over_path, pathlist)
 
     # =============================================================================
 
     # # # Run all maps and paralellize the execution and run with different params
 
-    for mode in ['EMA', 'EMB', 'EMC', 'EMD']:
-        print('-' * 20, 'Starting execution of mode: ', mode)
-        MODE = mode
-        par_RC = get_parameter(mode)
+    # for mode in ['EMA', 'EMB', 'EMC', 'EMD']:
+    #     print('-' * 20, 'Starting execution of mode: ', mode)
+    #     MODE = mode
+    #     par_RC = get_parameter(mode)
 
-        pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
+    #     pathlist = PPath(MAPS_PATH).glob("**/*.sgl")
 
-        # Iterate over different maps in parallel
-        p = Pool(processes=50)
-        p.map(run_ags_over_path, pathlist)
-        print('-' * 20, 'Finished mode: ', mode)
+    #     # Iterate over different maps in parallel
+    #     p = Pool(processes=50)
+    #     p.map(run_ags_over_path, pathlist)
+    #     print('-' * 20, 'Finished mode: ', mode)
 
 
     # =============================================================================

@@ -309,3 +309,7 @@ def _eq_intersection_point(a, b, c, j, k, l):
     x = (c * k - b * l) / aux
 
     return x, y
+
+
+def euclidean_distance(A, B):
+    return math.sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2)
