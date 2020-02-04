@@ -3,7 +3,7 @@
 O simbolo `# !` informa quais parâmetros foram alterados de uma versão para outra
 
 Fitness_trace:
-fit_d fit_obs fit_con fit_cur fit_t fit_dist
+fit_d fit_obs fit_con fit_cur fit_t fit_dist fit_z_bonus
 
 ## Mode A
 
