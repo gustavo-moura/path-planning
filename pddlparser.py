@@ -10,11 +10,11 @@ def json_to_pddl(map_json_filename, map_id, mission_json_filename, mission_id, o
     """Converts a json data structure of Map and Mission to PDDL constraints
 
     Args:
-        map_json_filename (str): the filename for the reference map json file, following the structure determined by Drone_arch.
-        map_id (int): the index in the list of previous file for the map to be considered.
-        mission_json_filename (str): the filename for the reference mission json file, following the structure determined by Drone_arch.
-        mission_id (int): the index in the list of previous file for the mission to be considered.
-        output_filename (str): the filename in which the conversion's output will be saved. String must end with ".txt" extensions to be saved correctly.
+        map_json_filename (str): the filename for the reference map JSON file, following the structure determined by Drone_arch.
+        map_id (int): the index in the list of the previous file for the map to be considered.
+        mission_json_filename (str): the filename for the reference mission JSON file, following the structure determined by Drone_arch.
+        mission_id (int): the index in the list of the previous file for the mission to be considered.
+        output_filename (str): the filename in which the conversion's output will be saved. The string must end with ".txt" extensions to be saved correctly.
         verbose (bool, optional): activate the verbose mode. Defaults to False.
     """
     print('\n\nStarting conversion...')
