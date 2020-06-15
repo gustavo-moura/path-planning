@@ -1,6 +1,8 @@
 import itertools
 from scipy.stats import norm
 
+
+
 # Support Functions
 # _________________________________________________________________________________________________
 def pairwise_circle(iterable):
@@ -21,6 +23,8 @@ def boundary(val, val_min, val_max):
   if val>val_max:
     return val_max
   return val
+
+
 
 # Ray Casting Algorithm
 # _________________________________________________________________________________________________
@@ -273,3 +277,37 @@ def _prob_collision(distance, uncertainty):
     # sigma : desvio padrão : scale
 
     return norm.sf(distance, loc=0, scale=uncertainty)
+
+
+
+# Area Inflation
+# _________________________________________________________________________________________________
+
+# using general equation of line
+def _eq_line(P, Q):
+    # general equation of line that intersect two points P and Q
+    # https://stackoverflow.com/questions/13242738/how-can-i-find-the-general-form-equation-of-a-line-from-two-points
+
+    # Ax + By + C = 0
+
+    A = P.y - Q.y
+    B = Q.x - P.x
+    C = (P.x * Q.y) - (Q.x * P.y)
+
+    return A, B, C
+
+
+def _eq_intersection_point(a, b, c, j, k, l):
+    # find the intersection point of two lines, given their general equation arguments
+    # https://stackoverflow.com/questions/13244666/how-can-i-find-the-intersection-of-two-lines-in-general-equation-form
+
+    aux = b * j - a * k
+
+    y = (a * l - c * j) / aux
+    x = (c * k - b * l) / aux
+
+    return x, y
+
+
+def euclidean_distance(A, B):
+    return math.sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2)
