@@ -1,7 +1,7 @@
 DIRECTORY_PATH=$(shell pwd)
 
 
-IMAGE_NAME=path-planning
+IMAGE_NAME=path-planning-hga
 TAG=$(shell git describe --tags --always --dirty)
 
 CONTAINER_NAME_JUPYTER=path-planning-jupyter
@@ -20,7 +20,7 @@ build:
 
 
 # Run docker image starting the jupyter notebook
-open-paper:
+open-paper: build
 	docker run \
 		-it --rm -a stdout \
 		-u `id -u`:`id -g` \
