@@ -11,10 +11,10 @@ class Mapa():
         self.origin = origin           # CartesianPoint : Define o ponto de partida da rota
         self.destination = destination # CartesianPoint : Define o ponto de destino da rota
         self.areas_n = areas_n         # [area, ...]
-                                       # area = [CartesianPoint(),...]      
+                                       # area = [CartesianPoint(),...]
         self.areas_n_inf = [ self._inflate_area(area, inflation_rate=inflation_rate, mode=mode) for area in areas_n ]
-        
-        
+
+
     def _inflate_area(self, area, inflation_rate, mode):
         if mode == 'percentage':
             # Infla uma área retangular em uma porcentagem do tamanho, alterando os valores em x% de cada vértice
@@ -31,7 +31,7 @@ class Mapa():
                 CartesianPoint(area[3].x + inc * x, area[3].y + dec * y)  # right, bottom
             ]
             new_area.append(new_area[0]) # Repetir primeiro ponto, para o ignore do shape na hora de plotar
-        
+
         elif mode == 'scalar':
             # Infla uma área retangular em uma quantidade fixa
             inc = (inflation_rate)
@@ -44,8 +44,7 @@ class Mapa():
                 CartesianPoint(area[3].x + inc, area[3].y + dec)  # right, bottom
             ]
             new_area.append(new_area[0]) # Repetir primeiro ponto, para o ignore do shape na hora de plotar
-        
-        
+
         return new_area
 
 
