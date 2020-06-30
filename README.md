@@ -1,17 +1,50 @@
 # Genetic Algorithm Applied in UAV's Path Planning
 
-Reorganizing and adding reproducible features to this project was part of the final project of the course "IA369 - Reproducibility in Computational Research", School of Electrical Engineering, UNICAMP.
+This research started as the conclusion work of my bachelor's degree in Information Systems at the University of Sao Paulo - USP. The reseach continued and led to the publication of a paper entitled "Genetic Algorithm Applied in UAV's Path Planning" published at the IEEE Congress on Evolutionary Computation (CEC). As an effort to make all the work reproducible, I took a course at the State University of Campinas (Unicamp) for my (current) Master's studies.
+
+## ABSTRACT
+
+The present paper introduces a hybrid genetic algorithm for path planning problem with obstacle avoidance. The genetic algorithm is combined with Ray Casting (RC) algorithm, where  RC  is  responsible  to  avoid  obstacles  and  to  find  safe regions  for  emergency  landing.  Thus,  the  path  planning  system must  deal  with  a  non-convex  environment  when  planning  and replanning  trajectories.  The  system  must  also  work  embedded on  the  UAV  running  under  a  Raspberry  Pi  board.  The  hybrid method  is  evaluated  over  50  benchmark  maps  from  literature with  satisfactory  results  reported.
+
+**INDEX TERMS** — hybrid  method,  ray  casting,  genetic  algorithm,path  planning,  UAV,  emergency  landing
+
 
 ## Table of Contents <!-- omit in toc -->
-
 - [Genetic Algorithm Applied in UAV's Path Planning](#genetic-algorithm-applied-in-uavs-path-planning)
+  - [ABSTRACT](#abstract)
+  - [Publications](#publications)
+    - [Cite](#cite)
   - [Repository Organization](#repository-organization)
   - [Dependencies](#dependencies)
+    - [Related Dependencies](#related-dependencies)
   - [Executing the Paper](#executing-the-paper)
-    - [Using Makefile (recommended)](#using-makefile-recommended)
-  - [Building the Image](#building-the-image)
-    - [Using Makefile (recommended)](#using-makefile-recommended-1)
-    - [Docker Build](#docker-build)
+    - [Building](#building)
+      - [Build Using Makefile (recommended)](#build-using-makefile-recommended)
+      - [Build Using Bash](#build-using-bash)
+    - [Running](#running)
+      - [Run Using Makefile (recommended)](#run-using-makefile-recommended)
+
+## Publications
+
+As a product of this research you can find publications relating this topic:
+
+- [(PDF)](./reports/Genetic%20Algorithm%20Applied%20in%20UAV's%20Path%20Planning.pdf) Genetic Algorithm for UAV's Path Planning - published at IEEE CEC 2020
+- [(Reproducible Paper)](./reports/Paper%20-%20Genetic%20Algorithm%20Applied%20in%20UAV's%20Path%20Planning.ipynb) Genetic Algorithm for UAV's Path Planning - Jupyter Notebook for Reproducibility
+- [(PDF)](http://bdta.sibi.usp.br/directbitstream/46bcc039-bf3c-47a3-960e-87530cf1944d/gustavo%20de%20moura%20souza.pdf) Genetic Algorithm for UAV's Path Planning - Undergrad Monograph
+
+### Cite
+
+To cite this work, use the following Bibtex:
+
+```bibtex
+@article{demoura2020,
+  author = {Gustavo deMoura, Claudio Toledo},
+  title = {Genetic Algorithm Applied in UAV's Path Planning},
+  journal = {{IEEE} Congress on Evolutionary Computation, {CEC} 2020},
+  publisher = {{IEEE}},
+  year = 2020,
+}
+```
 
 ## Repository Organization
 
@@ -20,44 +53,48 @@ This repository is organized as follows:
 - `data` contains all the data used in this work, it is mostly maps and configurations
 - `design` contains auxiliary files to understand the design of the proposed system
 - `experiments` contains the result files of the experiments
-- `reports` contains textual files that further explain this work [The paper is here!]
+- `reports` contains textual files that further explain this work (The paper is here!)
 - `src` contains all the source files
 - `test` contains testing files to assure everything is working
+
 
 ## Dependencies
 
 For the code to work, you need to have the following:
 
+- Ubuntu Operational System. (This work was done and tested on Ubuntu SO, althought there are indications that, by using Docker, you can run in other SOs, no tests were made to guarantee that.)
 - The platform [Docker](https://docs.docker.com/get-docker/) installed;
 - The image `path-planning-hga`; (check how to build it [here](#building-the-image))
 
+### Related Dependencies
+
+Although this work was developed in such a way that it is not necessary to install specific dependencies related to the codes, the full list of requirements for the code to compile is listed [here](./src/requirements.txt) in case you want to run without using Docker. We stress that the best way to run this work is using Docker.
+
 ## Executing the Paper
 
-### Using Makefile (recommended)
+First of all, clone this repository into your machine. Once the repository is cloned, there are a few ways you can execute this work.
 
-This is the easiest way of executing the paper. This Makefile was prepared so you don't need to worry. You do not need to build the image if usign this method, this make command will build the image for you. Simply run this command on your bash terminal:
+The first thing you need to do, is to build the image. Check out how [here](#building).
 
-```bash
-make open-paper
-```
+Then you need to compile and run the system to make the Jupyter Notebook available. Check out how [here](#running).
 
-Sometimes it is necessary to run in `sudo` mode.
+Having all the setup ready, simply open the [Reproducible Paper](./reports/Paper%20-%20Genetic%20Algorithm%20Applied%20in%20UAV's%20Path%20Planning.ipynb) on your browser and run all cells.
 
-## Building the Image
+### Building
 
-You can build the docker image for this work in two manners: (1) using the Makefile target or (2) running the commands yourself.
+You can build the docker image for this work in two manners: (1) using the Makefile target or (2) running the commands by yourself.
 
-### Using Makefile (recommended)
+#### Build Using Makefile (recommended)
 
-This is the easiest way of building the image. This Makefile was prepared so you don't need to worry. Simply run this command on your bash terminal:
+This is the easiest way of building the image. This Makefile was prepared so you don't need to worry. Simply run this command on your bash terminal from the root folder of this repository:
 
 ```bash
 make build
 ```
 
-### Docker Build
+#### Build Using Bash
 
-If you want to, you can compile the code and build the image yourself by running this command on your bash terminal:
+If you want to, you can compile the code and build the image yourself by running this command on your bash terminal from the root folder of this repository:
 
 ```bash
 sed \
@@ -85,14 +122,14 @@ Dockerfile \
     | docker build -t path-planning-hga:latest /home/path-planning/
 ```
 
-## Cite
+### Running
 
-```bibtex
-@article{demoura2020,
-  author  = {Gustavo deMoura, Claudio Toledo}, 
-  title   = {Genetic Algorithm Applied in UAV's Path Planning},
-  journal = {{IEEE} Congress on Evolutionary Computation, {CEC} 2020},
-  publisher = {{IEEE}},
-  year    = 2020,
-}
+#### Run Using Makefile (recommended)
+
+This is the easiest way of executing the paper. This Makefile was prepared so you don't need to worry. You do not need to build the image if using this method, this make command will build the image for you. Simply run this command on your bash terminal from the root folder of this repository:
+
+```bash
+make open-paper
 ```
+
+Sometimes it is necessary to run in `sudo` mode, since the command establishes a connection between your system's network ports, and that usually requires privileges.
