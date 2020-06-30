@@ -1,6 +1,6 @@
 # Genetic Algorithm Applied in UAV's Path Planning
 
-This research started as the conclusion work of my bachelor's degree in Information Systems at the University of Sao Paulo - USP. The reseach continued and led to the publication of a paper entitled "Genetic Algorithm Applied in UAV's Path Planning" published at the IEEE Congress on Evolutionary Computation (CEC). As an effort to make all the work reproducible, I took a course at the State University of Campinas (Unicamp) for my (current) Master's studies.
+This research started as the conclusion work of my bachelor's degree in Information Systems at the University of Sao Paulo - USP. The research continued and led to the publication of a paper entitled "Genetic Algorithm Applied in UAV's Path Planning" published at the IEEE Congress on Evolutionary Computation (CEC). As an effort to make all the work reproducible, I took a course at the State University of Campinas (Unicamp) for my (current) Master's studies and updated and enhanced this repository.
 
 ## ABSTRACT
 
@@ -8,13 +8,14 @@ The present paper introduces a hybrid genetic algorithm for path planning proble
 
 **INDEX TERMS** — hybrid  method,  ray  casting,  genetic  algorithm,path  planning,  UAV,  emergency  landing
 
-
 ## Table of Contents <!-- omit in toc -->
+
 - [Genetic Algorithm Applied in UAV's Path Planning](#genetic-algorithm-applied-in-uavs-path-planning)
   - [ABSTRACT](#abstract)
   - [Publications](#publications)
     - [Cite](#cite)
   - [Repository Organization](#repository-organization)
+  - [Workflow](#workflow)
   - [Dependencies](#dependencies)
     - [Related Dependencies](#related-dependencies)
   - [Executing the Paper](#executing-the-paper)
@@ -50,13 +51,24 @@ To cite this work, use the following Bibtex:
 
 This repository is organized as follows:
 
-- `data` contains all the data used in this work, it is mostly maps and configurations
-- `design` contains auxiliary files to understand the design of the proposed system
-- `experiments` contains the result files of the experiments
+- [`data`](./data) contains all the data used in this work, it is mostly maps and configurations
+- [`design`](./design) contains auxiliary files to understand the design of the proposed system
+- `experiments` contains the files for experiments
 - `reports` contains textual files that further explain this work (The paper is here!)
 - `src` contains all the source files
 - `test` contains testing files to assure everything is working
 
+## Workflow
+
+The path planning algorithm developed, called "Hybrid Genetic Algorithm" receives as input a mission object. The mission is composed of a map definition, an origin waypoint and a destination waypoint. The map contains obstacles, no-fly zones and bonus zones. As output, the algorithm projects the optimal route avoiding obstacles. The image belows instates the workflow of the algorithm.
+
+![Workflow for HGA](./design/hga_workflow.png)
+
+To test the performance of the proposed algorithm, the HGA is run over 50 different complex missions from literature. As a result, the algorithm will provide the best routes, as well as the time each route is produced. An analysis over these results will test each map to see its feasibility and generate a couple of reports. The image belows instates the workflow for the experiments run.
+
+![Workflow for the experiments](./design/experiments_workflow.png)
+
+The codes used to produce the HGA is at the [genetic file](./src/naboo/genetic.py). The codes used to run the test and the analysis is at the [reproducible paper](./reports/Paper%20-%20Genetic%20Algorithm%20Applied%20in%20UAV's%20Path%20Planning.ipynb).
 
 ## Dependencies
 
