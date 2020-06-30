@@ -1,10 +1,10 @@
-# Genetic Algorithm Applied to UAV's Path Planning
+# Genetic Algorithm Applied in UAV's Path Planning
 
 Reorganizing and adding reproducible features to this project was part of the final project of the course "IA369 - Reproducibility in Computational Research", School of Electrical Engineering, UNICAMP.
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Genetic Algorithm Applied to UAV's Path Planning](#genetic-algorithm-applied-to-uavs-path-planning)
+- [Genetic Algorithm Applied in UAV's Path Planning](#genetic-algorithm-applied-in-uavs-path-planning)
   - [Repository Organization](#repository-organization)
   - [Dependencies](#dependencies)
   - [Executing the Paper](#executing-the-paper)
@@ -83,4 +83,16 @@ sed \
     -e 's|{VERSION}|latest|g' \
 Dockerfile \
     | docker build -t path-planning-hga:latest /home/path-planning/
+```
+
+## Cite
+
+```bibtex
+@article{demoura2020,
+  author  = {Gustavo deMoura, Claudio Toledo}, 
+  title   = {Genetic Algorithm Applied in UAV's Path Planning},
+  journal = {{IEEE} Congress on Evolutionary Computation, {CEC} 2020},
+  publisher = {{IEEE}},
+  year    = 2020,
+}
 ```
