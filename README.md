@@ -53,10 +53,10 @@ This repository is organized as follows:
 
 - [`data`](./data) contains all the data used in this work, it is mostly maps and configurations
 - [`design`](./design) contains auxiliary files to understand the design of the proposed system
-- `experiments` contains the files for experiments
-- `reports` contains textual files that further explain this work (The paper is here!)
-- `src` contains all the source files
-- `test` contains testing files to assure everything is working
+- [`experiments`](./experiments) contains the files for experiments
+- [`reports`](./reports) contains textual files that further explain this work (The paper is here!)
+- [`src`](./src) contains all the source files
+- [`test`](./test) contains testing files to assure everything is working
 
 ## Workflow
 
