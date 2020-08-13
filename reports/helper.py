@@ -9,10 +9,10 @@ import itertools
 from pathlib import Path as PPath
 from multiprocessing import Pool
 
-from src.naboo.model import CartesianPoint, Mapa
-from src.naboo.visualization import plot_map, vis_mapa
+from src.chance_constraint.model import CartesianPoint, Mapa
+from src.chance_constraint.visualization import plot_map, vis_mapa
 
-from src.naboo.genetic import Genetic, Subject
+from src.chance_constraint.genetic import Genetic, Subject
 
 
 def make_globals(
@@ -493,6 +493,29 @@ def get_parameter(choice):
             "mutation_prob": 0.7,
             "gps_imprecision": 1,
             "planning_mode": "emergency",
+        },
+        "CCC": {
+            "taxa_cross": 5,
+            "population_size": 25,  # !
+            "max_exec_time": 30,
+            "C_d": 0,
+            "C_obs": 1,
+            "C_con": 10,
+            "C_cur": 10,
+            "C_t": 10,
+            "C_dist": 1,
+            "C_z_bonus": -10000,
+            "v_min": -3.0,
+            "v_max": 3.0,
+            "e_min": -3,
+            "e_max": 3,
+            "a_min": -2.0,
+            "a_max": 2.0,
+            "T_min": 1,
+            "T_max": 25,
+            "mutation_prob": 0.7,
+            "gps_imprecision": 1,
+            "planning_mode": "chance_constraint",
         },
     }
 

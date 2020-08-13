@@ -6,11 +6,13 @@ from math import cos, sin, sqrt, ceil
 
 # from itertools import tee
 
-from src.naboo.utils import pairwise, point_in_polygon, segment_in_polygon, euclidean_distance
+from src.chance_constraint.utils import pairwise, point_in_polygon, segment_in_polygon, euclidean_distance
 
 # from genetic.utils import _distance_wp_area, _prob_collision
 
-from src.naboo.model import CartesianPoint  # , Version
+from src.chance_constraint.model import CartesianPoint  # , Version
+
+from src.chance_constraint.chance_constraint import chance_constraint
 
 Gene = collections.namedtuple("Gene", "a e")
 GeneDecoded = collections.namedtuple("GeneDecoded", "x y v al")
@@ -444,6 +446,8 @@ class Genetic:
         self.history = []
         self.current_id = 0
 
+        print(f'planning_mode={planning_mode}')
+
     def run(self, max_exec_time=None, verbose=False, info=False, debug=False):
         self.max_exec_time = max_exec_time if max_exec_time else self.max_exec_time
 
@@ -620,7 +624,7 @@ class Genetic:
 
         save_fitness_trace = [
             fit_d,
-            fit_obs,
+            fit_obs_cc,
             fit_con,
             fit_cur,
             fit_t,
@@ -629,7 +633,7 @@ class Genetic:
 
         fitness_trace = [
             self.C_d * fit_d,
-            self.C_obs * fit_obs,
+            self.C_obs * fit_obs_cc,
             self.C_con * fit_con,
             self.C_cur * fit_cur,
             self.C_t * fit_t,
@@ -646,19 +650,12 @@ class Genetic:
         # Prioriza rotas que não ultrapassem obstáculos
         count = 0
 
-        for gene_decoded_t1, gene_decoded_t2 in pairwise(subject.dna_decoded):
+        for gene_decoded_t1 in subject.dna_decoded:
             # Utiliza somente as áreas infladas para cálculo
             for area_n in mapa.areas_n_inf:
                 wp1 = CartesianPoint(gene_decoded_t1.x, gene_decoded_t1.y)
-                wp2 = CartesianPoint(gene_decoded_t2.x, gene_decoded_t2.y)
 
-                # Calcula se algum waypoint está dentro de algum obstáculo
-                if point_in_polygon(wp1, area_n):
-                    count += 1
-
-                # Calcula se alguma conexão entre os waypoints intersecciona algum obstáculo
-                if segment_in_polygon(wp1, wp2, area_n):
-                    count += 1
+                count += chance_constraint(wp1, area_n)
 
         return count
 
