@@ -38,12 +38,15 @@ As a product of this research you can find publications relating this topic:
 To cite this work, use the following Bibtex:
 
 ```bibtex
-@article{demoura2020,
-  author = {Gustavo deMoura, Claudio Toledo},
-  title = {Genetic Algorithm Applied in UAV's Path Planning},
-  journal = {{IEEE} Congress on Evolutionary Computation, {CEC} 2020},
-  publisher = {{IEEE}},
-  year = 2020,
+@INPROCEEDINGS{demoura2020,
+  author={G. {de Moura Souza} and C. F. M. {Toledo}},
+  booktitle={2020 IEEE Congress on Evolutionary Computation (CEC)}, 
+  title={Genetic Algorithm Applied in UAV’s Path Planning}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={1-8},
+  doi={10.1109/CEC48606.2020.9185909}
 }
 ```
 
